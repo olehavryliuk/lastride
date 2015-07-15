@@ -5,6 +5,7 @@
 #include "MainMenu.h"
 #include "OptionsMenu.h"
 #include "GameEventReceiver.h"
+#include "LevelSceneNode.h"
 
 enum GAME_STATE
 {
@@ -24,15 +25,20 @@ private:
 	MainMenu* m_mainMenu;						//strong ref
 	OptionsMenu* m_optionsMenu;					//strong ref
 	GameEventReceiver* m_eventReceiver;			//strong ref
+	LevelSceneNode* m_levelSceneNode;			//strong ref
+	irr::scene::ICameraSceneNode* m_FPSCamera;	//weak
 	GAME_STATE m_gameState;
 
 public:
 	GameManager();
 	~GameManager();
 
-	bool Initialize();
+	bool initialize();
+	bool loadTestLevel();
 	void run();
 	irr::IrrlichtDevice* getDevice();
+
+	bool addFPSCamera();
 };
 
 #endif

@@ -199,14 +199,14 @@ int main()
 int main()
 {
 	GameManager gameManager;
-	if (!gameManager.Initialize())
+	if (!gameManager.initialize())
 		return 1;
 
 	irr::IrrlichtDevice* device = gameManager.getDevice();
 	
 	while(device->run())
 	{
-		gameManager.run();
+		gameManager.run(); //main game loop
 	}
 
 	return 0;

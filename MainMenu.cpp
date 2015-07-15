@@ -1,25 +1,23 @@
 //Author Oleh Havryliuk 07.2015
 #include "MainMenu.h"
 #include "Constants.h"
+#include "GameManager.h"
 
-MainMenu::MainMenu(irr::IrrlichtDevice* device)
+MainMenu::MainMenu(GameManager* gameManager)
 {
-	m_device = device;
+	m_gameManager = gameManager;
+	irr::IrrlichtDevice* device = m_gameManager->getDevice();
 	if (device)
 		m_guiEnviroment = device->getGUIEnvironment();
 	m_skin = m_guiEnviroment->getSkin();
 	m_font = m_guiEnviroment->getFont(FONT_PATH + DEFAULT_FONT);
 	if (m_font)
 		m_skin->setFont(m_font);
-
+	m_isActive = false;
 	m_buttonCount = 4;
 
 	//Position buttons relative on screen width half and height quarter
 	irr::core::dimension2d<irr::u32> screenSize = device->getVideoDriver()->getScreenSize();
-	//irr::u32 screenHalfWidth = screenSize.Width / 2;
-	//irr::u32 screen_3_4_Height = screenSize.Height * 3 / 4;
-	//irr::u32 halfButtonWidth = BUTTON_WIDTH / 2;
-	//irr::u32 halfButtonHeight = BUTTON_HEIGHT / 2;
 	irr::u32 xStartPosition = screenSize.Width / 2 - BUTTON_WIDTH / 2;
 	irr::u32 yStartPosition = screenSize.Height * 3 / 4 - m_buttonCount / 2 * (BUTTON_HEIGHT + BUTTON_MARGIN);
 	irr::core::rect<irr::s32> rect = irr::core::rect<irr::s32>(xStartPosition,
@@ -60,24 +58,37 @@ MainMenu::MainMenu(irr::IrrlichtDevice* device)
 										L"Click to quit the game");
 }
 
+bool MainMenu::isActive()
+{
+	return m_isActive;
+}
+void MainMenu::setActive(bool value)
+{
+	m_isActive = value;
+}
+
 bool MainMenu::OnEvent(const irr::SEvent& event)
 {
 	if (event.EventType == irr::EET_GUI_EVENT)
 	{
-		irr::s32 id = event.GUIEvent.Caller->getID();
-		switch (id)
+		if (event.GUIEvent.EventType == irr::gui::EGET_BUTTON_CLICKED)
 		{
-		case GUI_ID_RESUME_BUTTON:
-			return true;
-		case GUI_ID_NEW_GAME_BUTTON:
-			return true;
-		case GUI_ID_OPTIONS_BUTTON:
-			return true;
-		case GUI_ID_EXIT_BUTTON:
-			m_device->drop();
-			return true;
-		default:
-			return false;
+			irr::s32 id = event.GUIEvent.Caller->getID();
+			switch (id)
+			{
+			case GUI_ID_RESUME_BUTTON:
+				return true;
+			case GUI_ID_NEW_GAME_BUTTON:
+				m_gameManager->loadTestLevel();
+				return true;
+			case GUI_ID_OPTIONS_BUTTON:
+				return true;
+			case GUI_ID_EXIT_BUTTON:
+				m_gameManager->getDevice()->closeDevice();
+				return true;
+			default:
+				return false;
+			}
 		}
 	}
 

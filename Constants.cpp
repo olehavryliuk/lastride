@@ -1,3 +1,4 @@
+//Author Oleh Havryliuk 07.2015
 #include "Constants.h"
 
 //screen resolution
@@ -6,22 +7,31 @@ const irr::u32 SCREEN_HEIGHT_DEFAULT = 1024;
 
 //default device
 const irr::video::E_DRIVER_TYPE VIDEO_DRIVER_TYPE = irr::video::EDT_DIRECT3D9;
-const irr::u32 COLOR_BITS = 32;
+const irr::u8 COLOR_BITS = 32;
 const bool IS_FULLSCREEN = false;
-const bool HAS_STENCILBUFFER = false;
+const bool HAS_STENCILBUFFER = true;
 const bool IS_VSYNC = false;
+const irr::u8 ANTIALIASING = 0;
 
 //default button width, height, margin
 const irr::u32 BUTTON_WIDTH = 300;
-//Author Oleh Havryliuk 07.2015
 const irr::u32 BUTTON_HEIGHT = 50;
 const irr::u32 BUTTON_MARGIN = 5;
 
 //path
-const irr::core::stringw FONT_PATH = L"Resources\\Fonts\\";
-const irr::core::stringw MODEL_PATH = L"Resources\\Models\\";
-const irr::core::stringw TEXTURE_PATH = L"Resources\\Textures\\";
-const irr::core::stringw DEFAULT_FONT = L"fonthaettenschweiler.bmp";
+const irr::core::stringw FONT_PATH = L"Resources/Fonts/";
+const irr::core::stringw MODEL_PATH = L"Resources/Models/";
+const irr::core::stringw TEXTURE_PATH = L"Resources//Textures/";
+const irr::core::stringw DEFAULT_FONT = L"CourierNew_24px_bold.xml";
+
+//Resources names
+const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT = L"wall.jpg";
 
 //Debug
 const bool SHOW_FPS = true;
+
+//Room proportions
+const irr::core::vector3df ROOM_PROPORTIONS = irr::core::vector3df(8.0f,4.0f,4.0f);
+
+//CurveSceneNode
+const irr::u8 CURVE_SECTIONS_DEFAULT = 10;

@@ -5,16 +5,19 @@
 #include <irrTypes.h>
 #include <irrString.h>
 #include <EDriverTypes.h>
+#include <vector3d.h>
+
 //screen resolution
 extern const irr::u32 SCREEN_WIDTH_DEFAULT;
 extern const irr::u32 SCREEN_HEIGHT_DEFAULT;
 
 //default device
 extern const irr::video::E_DRIVER_TYPE VIDEO_DRIVER_TYPE;
-extern const irr::u32 COLOR_BITS;
+extern const irr::u8 COLOR_BITS;
 extern const bool IS_FULLSCREEN;
 extern const bool HAS_STENCILBUFFER;
 extern const bool IS_VSYNC;
+extern const irr::u8 ANTIALIASING;
 
 //default button width, height, margin
 extern const irr::u32 BUTTON_WIDTH;
@@ -27,7 +30,20 @@ extern const irr::core::stringw MODEL_PATH;
 extern const irr::core::stringw TEXTURE_PATH;
 extern const irr::core::stringw DEFAULT_FONT;
 
+//Resources names
+extern const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT;
+
 //Debug
 extern const bool SHOW_FPS;
+
+//Room proportions
+extern const irr::core::vector3df ROOM_PROPORTIONS;
+
+//CurveRoomSceneNode
+#define MAX_CURVE_SECTIONS 10
+extern const irr::u8 CURVE_SECTIONS_DEFAULT;
+
+//StraightRoomSceneNode
+#define MAX_STRAIGHT_SECTIONS 100
 
 #endif

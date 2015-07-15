@@ -12,11 +12,14 @@ enum
 	GUI_ID_EXIT_BUTTON = 104
 };
 
+class GameManager;
+
 class MainMenu : public irr::IEventReceiver
 {
 private:
 	irr::u32 m_buttonCount;
-	irr::IrrlichtDevice* m_device;
+	bool m_isActive;
+	GameManager* m_gameManager;  //weak
 	irr::gui::IGUIEnvironment* m_guiEnviroment;
 	irr::gui::IGUISkin* m_skin;
 	irr::gui::IGUIFont* m_font;
@@ -27,7 +30,9 @@ private:
 	irr::gui::IGUIButton* m_exit;
 
 public:
-	MainMenu(irr::IrrlichtDevice* device);
+	MainMenu(GameManager* gameManager);
+	bool isActive();
+	void setActive(bool value);
 	virtual bool OnEvent(const irr::SEvent& event);
 };
 
