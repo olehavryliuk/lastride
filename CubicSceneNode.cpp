@@ -4,12 +4,7 @@
 CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent, 
 								irr::scene::ISceneManager* mgr,
 								irr::s32 id,
-								irr::video::ITexture* front,
-								irr::video::ITexture* bottom,
-								irr::video::ITexture* left,
-								irr::video::ITexture* back,
-								irr::video::ITexture* top,
-								irr::video::ITexture* right,
+								irr::video::ITexture* texture,
 								const irr::core::vector3df& halfSize,
 								const irr::core::vector3df& position,
 								const irr::core::vector3df& rotation,
@@ -20,85 +15,71 @@ CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent,
 	m_box.MaxEdge.set(0,0,0);
 	m_box.MinEdge.set(0,0,0);
 
-	// create indices
-
-	m_indices[0] = 0;
-	m_indices[1] = 1;
-	m_indices[2] = 2;
-	m_indices[3] = 3;
-
 	// create m_material
-
-	irr::video::SMaterial mat;
-	mat.Lighting = false;
-	//mat.ZBuffer = irr::video::ECFN_NEVER;
-	//mat.ZWriteEnable = false;
-	mat.AntiAliasing=0;
-	mat.TextureLayer[0].TextureWrapU = irr::video::ETC_CLAMP_TO_EDGE;
-	mat.TextureLayer[0].TextureWrapV = irr::video::ETC_CLAMP_TO_EDGE;
+	m_material.Lighting = true;
+	m_material.setTexture(0, texture);
+	m_material.AntiAliasing=0;
+	m_material.TextureLayer[0].TextureWrapU = irr::video::ETC_CLAMP_TO_BORDER;
+	m_material.TextureLayer[0].TextureWrapV = irr::video::ETC_CLAMP_TO_BORDER;
 
 	const irr::f32 hX = halfSize.X;
 	const irr::f32 hY = halfSize.Y;
 	const irr::f32 hZ = halfSize.Z;
 
-	const irr::f32 t = 1.0f; //- onepixel;
-	const irr::f32 o = 0.0f; //+ onepixel;
+	const irr::f32 t = 1.0f;
+	const irr::f32 o = 0.0f;
 
-	// create front side
+	irr::video::SColor vertexColor = irr::video::SColor(255,255,255,255);
+/* 
+       -314         314
+          /7--------/6        y
+         /  |      / |        ^  z
+        /   |   31-4 |        | /
+  -31-4 3---------2  |        |/
+        |   4- - -| 3-14    *---->x
+        | -3-14   |  /       4-------|5
+        |/        | /         |    //|
+        0---------1/          |  //  |
+     -3-1-4     3-1-4         |//    |
+	                     0--------1
+	*/
+	m_vertices[0] = irr::video::S3DVertex(-hX,-hY,-hZ, -1,-1,-1, vertexColor, o, o);
+	m_vertices[1] = irr::video::S3DVertex( hX,-hY,-hZ,  1,-1,-1, vertexColor, t, o);
+	m_vertices[2] = irr::video::S3DVertex( hX, hY,-hZ,  1, 1,-1, vertexColor, t, 0.95f);
+	m_vertices[3] = irr::video::S3DVertex(-hX, hY,-hZ, -1, 1,-1, vertexColor, o, 0.95f);
+	m_vertices[4] = irr::video::S3DVertex(-hX,-hY, hZ, -1,-1, 1, vertexColor, o, 0.05f);
+	m_vertices[5] = irr::video::S3DVertex( hX,-hY, hZ,  1,-1, 1, vertexColor, t, 0.05f);
+	m_vertices[6] = irr::video::S3DVertex( hX, hY, hZ,  1, 1, 1, vertexColor, t, t);
+	m_vertices[7] = irr::video::S3DVertex(-hX, hY, hZ,  1, 1, 1, vertexColor, o, t);
 
-	m_material[0] = mat;
-	m_material[0].setTexture(0, front);
-	m_vertices[0] = irr::video::S3DVertex(-hX,-hY,-hZ, 0,0,-1, irr::video::SColor(255,255,255,255), o, o);
-	m_vertices[1] = irr::video::S3DVertex(-hX, hY,-hZ, 0,0,-1, irr::video::SColor(255,255,255,255), o, t);
-	m_vertices[2] = irr::video::S3DVertex( hX, hY,-hZ, 0,0,-1, irr::video::SColor(255,255,255,255), t, t);
-	m_vertices[3] = irr::video::S3DVertex( hX,-hY,-hZ, 0,0,-1, irr::video::SColor(255,255,255,255), t, o);
-
-	// create bottom side
-
-	m_material[1] = mat;
-	m_material[1].setTexture(0, bottom);
-	m_vertices[4] = irr::video::S3DVertex(-hX,-hY, hZ, 0,-1,0, irr::video::SColor(255,255,255,255), o, o);
-	m_vertices[5] = irr::video::S3DVertex(-hX,-hY,-hZ, 0,-1,0, irr::video::SColor(255,255,255,255), o, t);
-	m_vertices[6] = irr::video::S3DVertex( hX,-hY,-hZ, 0,-1,0, irr::video::SColor(255,255,255,255), t, t);
-	m_vertices[7] = irr::video::S3DVertex( hX,-hY, hZ, 0,-1,0, irr::video::SColor(255,255,255,255), t, o);
-
-	// create left side
-
-	m_material[2] = mat;
-	m_material[2].setTexture(0, left);
-	m_vertices[8]  = irr::video::S3DVertex(-hX,-hY, hZ, -1,0,0, irr::video::SColor(255,255,255,255), o, o);
-	m_vertices[9]  = irr::video::S3DVertex(-hX, hY, hZ, -1,0,0, irr::video::SColor(255,255,255,255), o, t);
-	m_vertices[10] = irr::video::S3DVertex(-hX, hY,-hZ, -1,0,0, irr::video::SColor(255,255,255,255), t, t);
-	m_vertices[11] = irr::video::S3DVertex(-hX,-hY,-hZ, -1,0,0, irr::video::SColor(255,255,255,255), t, o);
-
-	// create back side
-
-	m_material[3] = mat;
-	m_material[3].setTexture(0, back);
-	m_vertices[12] = irr::video::S3DVertex( hX,-hY, hZ, 0,0,1, irr::video::SColor(255,255,255,255), o, o);
-	m_vertices[13] = irr::video::S3DVertex( hX, hY, hZ, 0,0,1, irr::video::SColor(255,255,255,255), o, t);
-	m_vertices[14] = irr::video::S3DVertex(-hX, hY, hZ, 0,0,1, irr::video::SColor(255,255,255,255), t, t);
-	m_vertices[15] = irr::video::S3DVertex(-hX,-hY, hZ, 0,0,1, irr::video::SColor(255,255,255,255), t, o);
-
-	// create top side
-
-	m_material[4] = mat;
-	m_material[4].setTexture(0, top);
-	m_vertices[16] = irr::video::S3DVertex(-hX, hY,-hZ, 0, 1, 0, irr::video::SColor(255,255,255,255), o, o);
-	m_vertices[17] = irr::video::S3DVertex(-hX, hY, hZ, 0, 1, 0, irr::video::SColor(255,255,255,255), o, t);
-	m_vertices[18] = irr::video::S3DVertex( hX, hY, hZ, 0, 1, 0, irr::video::SColor(255,255,255,255), t, t);
-	m_vertices[19] = irr::video::S3DVertex( hX, hY,-hZ, 0, 1, 0, irr::video::SColor(255,255,255,255), t, o);
-
-	// create right side
-
-	m_material[5] = mat;
-	m_material[5].setTexture(0, right);
-	m_vertices[20] = irr::video::S3DVertex( hX,-hY,-hZ, 1,0,0, irr::video::SColor(255,255,255,255), t, t);
-	m_vertices[21] = irr::video::S3DVertex( hX, hY,-hZ, 1,0,0, irr::video::SColor(255,255,255,255), o, t);
-	m_vertices[22] = irr::video::S3DVertex( hX, hY, hZ, 1,0,0, irr::video::SColor(255,255,255,255), o, o);
-	m_vertices[23] = irr::video::S3DVertex( hX,-hY, hZ, 1,0,0, irr::video::SColor(255,255,255,255), t, o);
-
-
+	// create indices
+	for (irr::s32 i = 0; i < 3; i++)
+	{
+		m_indices[0+6*i] = 0 + i;
+		m_indices[1+6*i] = 5 + i;
+		m_indices[2+6*i] = 4 + i;
+		m_indices[3+6*i] = 0 + i;
+		m_indices[4+6*i] = 1 + i;
+		m_indices[5+6*i] = 5 + i;
+	}
+	m_indices[18] = 3;
+	m_indices[19] = 4;
+	m_indices[20] = 7;
+	m_indices[21] = 3;
+	m_indices[22] = 0;
+	m_indices[23] = 4;
+	m_indices[24] = 0;
+	m_indices[25] = 3;
+	m_indices[26] = 2;
+	m_indices[27] = 0;
+	m_indices[28] = 2;
+	m_indices[29] = 1;
+	m_indices[30] = 5;
+	m_indices[31] = 6;
+	m_indices[32] = 7;
+	m_indices[33] = 5;
+	m_indices[34] = 7;
+	m_indices[35] = 4;
 	/*
 	m_box.reset(m_vertices[0].Pos);
 	for (irr::s32 i = 1; i < 12; ++i)
@@ -116,17 +97,12 @@ void CubicSceneNode::OnRegisterSceneNode()
 void CubicSceneNode::render()
 {
 	irr::video::IVideoDriver* driver = SceneManager->getVideoDriver();
-
 	if (!driver)
 		return;
 
 	driver->setTransform(irr::video::ETS_WORLD, AbsoluteTransformation);
-
-		for (irr::s32 i = 0; i < 6; ++i)
-		{
-			driver->setMaterial(m_material[i]);
-			driver->drawIndexedTriangleFan(&m_vertices[i*4], 4, m_indices, 2);
-		}
+	driver->setMaterial(m_material);
+	driver->drawIndexedTriangleList(m_vertices, 8, m_indices, 12);
 }
 
 const irr::core::aabbox3d<irr::f32>& CubicSceneNode::getBoundingBox() const
@@ -136,10 +112,10 @@ const irr::core::aabbox3d<irr::f32>& CubicSceneNode::getBoundingBox() const
 
 irr::u32 CubicSceneNode::getMaterialCount() const
 {
-	return 4;
+	return 1;
 }
 
 irr::video::SMaterial& CubicSceneNode::getMaterial(irr::u32 i)
 {
-	return m_material[i];
+	return m_material;
 }

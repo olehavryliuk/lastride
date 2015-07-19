@@ -6,7 +6,7 @@ StraightRoomSceneNode::StraightRoomSceneNode(irr::scene::ISceneNode* parent,
 						irr::scene::ISceneManager* mgr,
 						irr::s32 id,
 						irr::video::ITexture* texture,
-						irr::u16 sectionCount,
+						irr::u32 sectionCount,
 						const irr::core::vector3df& halfSize,
 						const irr::core::vector3df& position,
 						const irr::core::vector3df& rotation,
@@ -32,9 +32,10 @@ StraightRoomSceneNode::StraightRoomSceneNode(irr::scene::ISceneNode* parent,
 	m_material.TextureLayer[0].TextureWrapU = irr::video::ETC_REPEAT;
 	m_material.TextureLayer[0].TextureWrapV = irr::video::ETC_REPEAT;
 
-	const irr::f32 hX = halfSize.X;
-	const irr::f32 hY = halfSize.Y;
-	const irr::f32 Z = 2.0f * halfSize.Z;
+	m_halfSize = halfSize;
+	const irr::f32 hX = m_halfSize.X;
+	const irr::f32 hY = m_halfSize.Y;
+	const irr::f32 Z = 2.0f * m_halfSize.Z;
 
 	const irr::f32 t = 1.0f;
 	const irr::f32 o = 0.0f;
@@ -125,4 +126,16 @@ irr::u32 StraightRoomSceneNode::getMaterialCount() const
 irr::video::SMaterial& StraightRoomSceneNode::getMaterial(irr::u32 i)
 {
 	return m_material;
+}
+
+irr::core::vector3df StraightRoomSceneNode::centerPositionTransformedForSection(irr::u32 sectionNumber)
+{
+	irr::core::vector3df result = irr::core::vector3df(0.0f, 0.0f, m_halfSize.Z * (float)(2 * sectionNumber + 1));
+	AbsoluteTransformation.transformVect(result);
+	return result;
+}
+
+irr::core::vector3df StraightRoomSceneNode::centerPositionForSection(irr::u32 sectionNumber)
+{
+	return irr::core::vector3df(0.0f, 0.0f, m_halfSize.Z * (float)(2 * sectionNumber + 1));
 }

@@ -58,7 +58,7 @@ GameManager::~GameManager()
 	delete m_mainMenu;
 	delete m_optionsMenu;
 	delete m_eventReceiver;
-	delete m_levelSceneNode;
+	//delete m_levelSceneNode;
 
 	m_device->drop();
 }
@@ -70,7 +70,8 @@ irr::IrrlichtDevice* GameManager::getDevice()
 
 bool GameManager::loadTestLevel()
 {
-	m_levelSceneNode = new LevelSceneNode(m_device, NULL, m_sceneManager);
+	if (!m_levelSceneNode)
+		m_levelSceneNode = new LevelSceneNode(m_device, m_sceneManager->getRootSceneNode(), m_sceneManager);
 	if (!m_levelSceneNode)
 		return false;
 
@@ -79,6 +80,25 @@ bool GameManager::loadTestLevel()
 
 	m_gameState = GS_PLAYING;
 	m_device->getCursorControl()->setVisible(false);
+
+	//m_levelSceneNode->drop();
+
+	return true;
+}
+
+bool GameManager::loadLevelFromXML(const irr::io::path& filePath)
+{
+	m_levelSceneNode = new LevelSceneNode(m_device, m_sceneManager->getRootSceneNode(), m_sceneManager);
+	if (!m_levelSceneNode)
+		return false;
+
+	addFPSCamera();
+	m_levelSceneNode->loadLevelFromXML(filePath);
+
+	m_gameState = GS_PLAYING;
+	m_device->getCursorControl()->setVisible(false);
+
+	m_levelSceneNode->drop();
 
 	return true;
 }

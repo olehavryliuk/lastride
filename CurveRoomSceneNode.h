@@ -8,15 +8,17 @@
 
 enum DIRECTION
 {
-	D_UP	= 0,
-	D_DOWN  = 1,
-	D_RIGHT = 2,
-	D_LEFT	= 3
+	D_UP		= 0,
+	D_DOWN		= 1,
+	D_RIGHT		= 2,
+	D_LEFT		= 3,
+	D_FORWARD	= 4,
+	D_BACKWARD  = 5
 };
 
 class CurveRoomSceneNode : public irr::scene::ISceneNode
 {
-private:
+protected:
 	irr::core::aabbox3d<irr::f32> m_box;
 	irr::u16 m_indices[MAX_CURVE_SECTIONS*24];
 	irr::video::S3DVertex m_vertices[(MAX_CURVE_SECTIONS+1)*4];

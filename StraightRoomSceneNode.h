@@ -7,12 +7,13 @@
 
 class StraightRoomSceneNode : public irr::scene::ISceneNode
 {
-private:
+protected:
 	irr::core::aabbox3d<irr::f32> m_box;
 	irr::u16 m_indices[MAX_STRAIGHT_SECTIONS*24];
 	irr::video::S3DVertex m_vertices[(MAX_STRAIGHT_SECTIONS+1)*4];
-	irr::u16 m_verticesCount;
-	irr::u16 m_sectionCount;
+	irr::core::vector3df m_halfSize;
+	irr::u32 m_verticesCount;
+	irr::u32 m_sectionCount;
 	irr::video::SMaterial m_material;
 
 public:
@@ -20,7 +21,7 @@ public:
 						irr::scene::ISceneManager* mgr,
 						irr::s32 id,
 						irr::video::ITexture* texture,
-						irr::u16 sectionCount = 1,
+						irr::u32 sectionCount = 1,
 						const irr::core::vector3df& halfSize = ROOM_PROPORTIONS,
 						const irr::core::vector3df& position = irr::core::vector3df(0.0f,0.0f,0.0f),
 						const irr::core::vector3df& rotation = irr::core::vector3df(0.0f,0.0f,0.0f),
@@ -31,6 +32,8 @@ public:
 	virtual const irr::core::aabbox3d<irr::f32>& getBoundingBox() const;
 	virtual irr::u32 getMaterialCount() const;
 	virtual irr::video::SMaterial& getMaterial(irr::u32 i);
+	virtual irr::core::vector3df centerPositionTransformedForSection(irr::u32 sectionNumber);
+	virtual irr::core::vector3df centerPositionForSection(irr::u32 sectionNumber);
 };
 
 #endif

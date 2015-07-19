@@ -6,7 +6,7 @@
 
 class SquareRoomSceneNode : public irr::scene::ISceneNode
 {
-private:
+protected:
 	irr::core::aabbox3d<irr::f32> m_box;
 	irr::u16 m_indices[4];
 	irr::video::S3DVertex m_vertices[16];

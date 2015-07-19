@@ -28,22 +28,28 @@ extern const irr::u32 BUTTON_MARGIN;
 extern const irr::core::stringw FONT_PATH;
 extern const irr::core::stringw MODEL_PATH;
 extern const irr::core::stringw TEXTURE_PATH;
+extern const irr::core::stringw LEVEL_PATH;
 extern const irr::core::stringw DEFAULT_FONT;
 
 //Resources names
 extern const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT;
+extern const irr::core::stringw WALL_TEXTURE_NAME_DEFAULT;
 
 //Debug
 extern const bool SHOW_FPS;
 
 //Room proportions
 extern const irr::core::vector3df ROOM_PROPORTIONS;
+extern const irr::core::vector3df ROOM_SCALE;
+extern const irr::f32 WALL_WIDTH;
 
 //CurveRoomSceneNode
 #define MAX_CURVE_SECTIONS 10
-extern const irr::u8 CURVE_SECTIONS_DEFAULT;
+extern const irr::u8 CURVE_SECTIONS;
+extern const irr::f32 CURVE_RADIUS;
 
 //StraightRoomSceneNode
 #define MAX_STRAIGHT_SECTIONS 100
+extern const irr::u8 STRAIGHT_SECTIONS_DEFAULT;
 
 #endif

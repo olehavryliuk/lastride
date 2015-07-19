@@ -39,8 +39,6 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 
 	// create m_material
 	m_material.Lighting = true;
-	//m_material.ZBuffer = irr::video::ECFN_NEVER;
-	//m_material.ZWriteEnable = false;
 	m_material.AntiAliasing = ANTIALIASING;
 	m_material.setTexture(0, texture);
 	m_material.TextureLayer[0].TextureWrapU = irr::video::ETC_REPEAT;
@@ -53,8 +51,7 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 
 	const irr::f32 t = 1.0f;
 	const irr::f32 o = 0.0f;
-
-	/* 
+/* 
        -314         314
           /7--------/6        y
          /  |      / |        ^  z
@@ -67,78 +64,78 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
      -3-1-4     3-1-4         |//    |
 	                     0--------1
 	*/
-	irr::f32 sign = 1.0f;
 	irr::f32 sinus, cosinus, wideRadius, shortRadius;
 	irr::video::SColor vertexColor = irr::video::SColor(255,255,255,255);
 	irr::video::S3DVertex swapVertex;
 
-	if (m_direction == D_RIGHT || m_direction == D_LEFT)
+	wideRadius = m_radius + hX;
+	shortRadius = m_radius - hX;
+
+	if (m_direction == D_LEFT)
 	{
-		sign = (m_direction == D_RIGHT) ? -1.0f : 1.0f;
 		irr::f32 x_0_3, x_1_2, z_0_3, z_1_2;
 
 		for (irr::s32 i = 0; i < m_sectionCount + 1; i++)
 		{
 			cosinus = cos(m_sectionAngle * i);
 			sinus = sin(m_sectionAngle * i);
-			wideRadius = m_radius + hX;
-			shortRadius = m_radius - hX;
-
-			x_0_3 = sign * (shortRadius * cosinus - m_radius);
-			x_1_2 =	sign * (wideRadius * cosinus - m_radius);
+			x_0_3 = shortRadius * cosinus - m_radius;
+			x_1_2 =	wideRadius * cosinus - m_radius;
 			z_0_3 = shortRadius * sinus;
 			z_1_2 =	wideRadius * sinus;
 
-			m_vertices[0+4*i] = irr::video::S3DVertex(x_0_3,
-													  -hY,
-													  z_0_3, 
-													  sign * cosinus, 1.0f, sinus, 
+			m_vertices[0+4*i] = irr::video::S3DVertex(x_0_3, -hY, z_0_3, 
+													  cosinus, 1.0f, sinus, 
 													  vertexColor,
 													  o, o + t * (float)i);
-			m_vertices[1+4*i] = irr::video::S3DVertex(x_1_2,
-													  -hY,
-													  z_1_2,
-													  -sign * cosinus, 1.0f, -sinus, 
+			m_vertices[1+4*i] = irr::video::S3DVertex(x_1_2, -hY, z_1_2,
+													  -cosinus, 1.0f, -sinus, 
 													  vertexColor,
 													  t, o + t * (float)i);
-			m_vertices[2+4*i] = irr::video::S3DVertex(x_1_2,
-													  hY,
-													  z_1_2, 
-													  -sign * cosinus, -1.0f, -sinus, 
+			m_vertices[2+4*i] = irr::video::S3DVertex(x_1_2, hY, z_1_2, 
+													  -cosinus, -1.0f, -sinus, 
 													  vertexColor,
 													  2 * t, o + t * (float)i);
-			m_vertices[3+4*i] = irr::video::S3DVertex(x_0_3,
-													  hY,
-													  z_0_3, 
-													  sign * cosinus, -1.0f, sinus, 
+			m_vertices[3+4*i] = irr::video::S3DVertex(x_0_3, hY, z_0_3, 
+													  cosinus, -1.0f, sinus, 
 													  vertexColor,
-													  //3 * t, o + t * (float)i);
 													  t, o + t * (float)i);
-
-			if (m_direction == D_RIGHT)
-			{
-				swapVertex = m_vertices[0+4*i];
-				m_vertices[0+4*i].Pos = m_vertices[1+4*i].Pos;
-				m_vertices[0+4*i].Normal = m_vertices[1+4*i].Normal;
-				m_vertices[0+4*i].Color = m_vertices[1+4*i].Color;
-				m_vertices[1+4*i].Pos = swapVertex.Pos;
-				m_vertices[1+4*i].Normal = swapVertex.Normal;
-				m_vertices[1+4*i].Color = swapVertex.Color;
-
-				swapVertex = m_vertices[2+4*i];
-				m_vertices[2+4*i].Pos = m_vertices[3+4*i].Pos;
-				m_vertices[2+4*i].Normal = m_vertices[3+4*i].Normal;
-				m_vertices[2+4*i].Color = m_vertices[3+4*i].Color;
-				m_vertices[3+4*i].Pos = swapVertex.Pos;
-				m_vertices[3+4*i].Normal = swapVertex.Normal;
-				m_vertices[3+4*i].Color = swapVertex.Color;
-			}
 		}
 	}
-	else
+	else if (m_direction == D_RIGHT)
 	{
-		sign = (m_direction == D_UP) ? -1.0f : 1.0f;
-		irr::f32 y_1_2, y_3_4, z_1_2, z_3_4;
+		irr::f32 x_0_3, x_1_2, z_0_3, z_1_2;
+		
+		for (irr::s32 i = 0; i < m_sectionCount + 1; i++)
+		{
+			cosinus = cos(m_sectionAngle * i);
+			sinus = sin(m_sectionAngle * i);
+			x_0_3 = -wideRadius * cosinus + m_radius;
+			x_1_2 =	-shortRadius * cosinus + m_radius;
+			z_0_3 = wideRadius * sinus;
+			z_1_2 =	shortRadius * sinus;
+
+			m_vertices[0+4*i] = irr::video::S3DVertex(x_0_3, -hY, z_0_3, 
+													  cosinus, 1.0f, -sinus, 
+													  vertexColor,
+													  o, o + t * (float)i);
+			m_vertices[1+4*i] = irr::video::S3DVertex(x_1_2, -hY, z_1_2,
+													  -cosinus, 1.0f, sinus, 
+													  vertexColor,
+													  t, o + t * (float)i);
+			m_vertices[2+4*i] = irr::video::S3DVertex(x_1_2, hY, z_1_2, 
+													  -cosinus, -1.0f, sinus, 
+													  vertexColor,
+													  2 * t, o + t * (float)i);
+			m_vertices[3+4*i] = irr::video::S3DVertex(x_0_3, hY, z_0_3, 
+													  cosinus, -1.0f, -sinus, 
+													  vertexColor,
+													  t, o + t * (float)i);
+		}
+	}
+	else if (m_direction == D_DOWN)
+	{
+		irr::f32 y_0_1, y_2_3, z_1_2, z_3_4;
 
 		for (irr::s32 i = 0; i < m_sectionCount + 1; i++)
 		{
@@ -147,50 +144,61 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 			wideRadius = m_radius + hY;
 			shortRadius = m_radius - hY;
 
-			y_1_2 = sign * (shortRadius * cosinus - m_radius);
-			y_3_4 = sign * (wideRadius * cosinus - m_radius);
+			y_0_1 = shortRadius * cosinus - m_radius;
+			y_2_3 = wideRadius * cosinus - m_radius;
 			z_1_2 = shortRadius * sinus;
 			z_3_4 = wideRadius * sinus;
 
-			m_vertices[0+4*i] = irr::video::S3DVertex(-hX,
-													  y_1_2,
-													  z_1_2, 
-													  1.0f, cosinus, sign * sinus, 
+			m_vertices[0+4*i] = irr::video::S3DVertex(-hX, y_0_1, z_1_2, 
+													  1.0f, cosinus, sinus, 
 													  vertexColor,
 													  o, o + t * (float)i);
-			m_vertices[1+4*i] = irr::video::S3DVertex(hX,
-													  y_1_2,
-													  z_1_2, 
-													  -1.0f, cosinus, sign * sinus, 
+			m_vertices[1+4*i] = irr::video::S3DVertex(hX, y_0_1, z_1_2, 
+													  -1.0f, cosinus, sinus, 
 													  vertexColor,
 													  t, o + t * (float)i);
-			m_vertices[2+4*i] = irr::video::S3DVertex(hX,
-													  y_3_4,
-													  z_3_4, 
-													  -1.0f, -cosinus, -sign * sinus,
+			m_vertices[2+4*i] = irr::video::S3DVertex(hX, y_2_3, z_3_4, 
+													  -1.0f, -cosinus, -sinus,
 													  vertexColor,
 													  2 * t, o + t * (float)i);
-			m_vertices[3+4*i] = irr::video::S3DVertex(-hX,
-													  y_3_4,
-													  z_3_4, 
-													  1.0f, -cosinus, -sign * sinus,
+			m_vertices[3+4*i] = irr::video::S3DVertex(-hX, y_2_3, z_3_4, 
+													  1.0f, -cosinus, -sinus,
 													  vertexColor,
-													  //3 * t, o + t * (float)i);
 													  t, o + t * (float)i);
-			if (m_direction == D_UP)
-			{
-				swapVertex = m_vertices[0+4*i];
-				m_vertices[0+4*i].Pos = m_vertices[3+4*i].Pos;
-				m_vertices[0+4*i].Color = m_vertices[3+4*i].Color;
-				m_vertices[3+4*i].Pos = swapVertex.Pos;
-				m_vertices[3+4*i].Color = swapVertex.Color;
+		}
+	}
+	else //m_direction == D_UP
+	{
+		irr::f32 y_0_1, y_2_3, z_1_2, z_3_4;
 
-				swapVertex = m_vertices[2+4*i];
-				m_vertices[2+4*i].Pos = m_vertices[1+4*i].Pos;
-				m_vertices[2+4*i].Color = m_vertices[1+4*i].Color;
-				m_vertices[1+4*i].Pos = swapVertex.Pos;
-				m_vertices[1+4*i].Color = swapVertex.Color;
-			}
+		for (irr::s32 i = 0; i < m_sectionCount + 1; i++)
+		{
+			cosinus = cos(m_sectionAngle * i);
+			sinus = sin(m_sectionAngle * i);
+			wideRadius = m_radius + hY;
+			shortRadius = m_radius - hY;
+
+			y_0_1 = -wideRadius * cosinus + m_radius;
+			y_2_3 = -shortRadius * cosinus + m_radius;
+			z_1_2 = wideRadius * sinus;
+			z_3_4 = shortRadius * sinus;
+
+			m_vertices[0+4*i] = irr::video::S3DVertex(-hX, y_0_1, z_1_2, 
+													  1.0f, cosinus, -sinus, 
+													  vertexColor,
+													  o, o + t * (float)i);
+			m_vertices[1+4*i] = irr::video::S3DVertex(hX, y_0_1, z_1_2, 
+													  -1.0f, cosinus, -sinus, 
+													  vertexColor,
+													  t, o + t * (float)i);
+			m_vertices[2+4*i] = irr::video::S3DVertex(hX, y_2_3, z_3_4, 
+													  -1.0f, -cosinus, sinus,
+													  vertexColor,
+													  2 * t, o + t * (float)i);
+			m_vertices[3+4*i] = irr::video::S3DVertex(-hX, y_2_3, z_3_4, 
+													  1.0f, -cosinus, sinus,
+													  vertexColor,
+													  t, o + t * (float)i);
 		}
 	}
 
