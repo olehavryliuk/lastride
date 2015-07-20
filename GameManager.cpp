@@ -43,6 +43,7 @@ bool GameManager::initialize()
 	m_sceneManager = m_device->getSceneManager();
 	m_GUIEnviroment = m_device->getGUIEnvironment();
 
+//add menus
 	m_mainMenu = new MainMenu(this);
 	m_mainMenu->setActive(true);
 	m_optionsMenu = new OptionsMenu(m_device);
@@ -58,7 +59,6 @@ GameManager::~GameManager()
 	delete m_mainMenu;
 	delete m_optionsMenu;
 	delete m_eventReceiver;
-	//delete m_levelSceneNode;
 
 	m_device->drop();
 }
@@ -79,6 +79,7 @@ bool GameManager::loadTestLevel()
 	m_levelSceneNode->loadTestLevel();
 
 	m_gameState = GS_PLAYING;
+
 	m_device->getCursorControl()->setVisible(false);
 
 	//m_levelSceneNode->drop();
@@ -92,7 +93,8 @@ bool GameManager::loadLevelFromXML(const irr::io::path& filePath)
 	if (!m_levelSceneNode)
 		return false;
 
-	addFPSCamera();
+	//addFPSCamera();
+
 	m_levelSceneNode->loadLevelFromXML(filePath);
 
 	m_gameState = GS_PLAYING;
@@ -100,7 +102,14 @@ bool GameManager::loadLevelFromXML(const irr::io::path& filePath)
 
 	m_levelSceneNode->drop();
 
+	//m_mainMenu->setActive(false);
+
 	return true;
+}
+
+void GameManager::update()
+{
+	m_levelSceneNode->update();
 }
 
 void GameManager::run()
@@ -108,9 +117,14 @@ void GameManager::run()
 	m_driver->beginScene(true, true, irr::video::SColor(255,100,100,140));
 	
 	if (m_gameState == GS_PLAYING)
+	{
+		update();
 		m_sceneManager->drawAll();
+	}
 	else
+	{
 		m_GUIEnviroment->drawAll();
+	}
 
 	m_driver->endScene();
 }

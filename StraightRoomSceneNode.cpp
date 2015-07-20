@@ -54,7 +54,7 @@ StraightRoomSceneNode::StraightRoomSceneNode(irr::scene::ISceneNode* parent,
 	*/
 	irr::video::SColor vertexColor = irr::video::SColor(255,255,255,255);
 
-	for (irr::s32 i = 0; i < m_sectionCount + 1; i++)
+	for (irr::u32 i = 0; i < m_sectionCount + 1; i++)
 	{
 		m_vertices[0+4*i] = irr::video::S3DVertex(-hX, -hY, (float)i * Z,
 												  1.0f, 1.0f, 0.0f,
@@ -75,7 +75,7 @@ StraightRoomSceneNode::StraightRoomSceneNode(irr::scene::ISceneNode* parent,
 	}
 
 	// create indices
-	for (irr::s32 i = 0; i < 4 * m_sectionCount; i++)
+	for (irr::u32 i = 0; i < 4 * m_sectionCount; i++)
 	{
 		m_indices[0+6*i] = 0 + i;
 		m_indices[1+6*i] = 4 + i;
@@ -126,6 +126,16 @@ irr::u32 StraightRoomSceneNode::getMaterialCount() const
 irr::video::SMaterial& StraightRoomSceneNode::getMaterial(irr::u32 i)
 {
 	return m_material;
+}
+
+irr::u32 StraightRoomSceneNode::getVertexCount() const
+{
+	return m_verticesCount;
+}
+
+const irr::video::S3DVertex* StraightRoomSceneNode::getVertices() const
+{
+	return m_vertices;
 }
 
 irr::core::vector3df StraightRoomSceneNode::centerPositionTransformedForSection(irr::u32 sectionNumber)

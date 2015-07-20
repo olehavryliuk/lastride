@@ -15,99 +15,77 @@ LevelSceneNode::LevelSceneNode(irr::IrrlichtDevice* device,
 	m_sceneManager = device->getSceneManager();
 	m_currentObstacle = nullptr;
 	m_currentRoomNode = nullptr;
+	m_vehicle= nullptr;
+	m_cameraNode = nullptr;
+	m_lightNode = nullptr;
 	m_currentSection = 0;
 	m_currentFacePosition = irr::core::vector3df(0.0f, 0.0f, 0.0f);
 	m_currentFaceRotation = irr::core::vector3df(0.0f, 0.0f, 0.0f);
+	m_lastTime = 0;
+	m_finished = false;
+
+//navigation points
+	m_currentNavigationPointIndex = 0;
+	m_distanceFullBNP = 0.0f;
+	m_distancePassedBNP = 0.0f;
 
 	setAutomaticCulling(irr::scene::EAC_OFF);
 	m_box.MaxEdge.set(0,0,0);
 	m_box.MinEdge.set(0,0,0);
 }
 
+LevelSceneNode::~LevelSceneNode()
+{
+	delete m_vehicle;
+}
+
+bool LevelSceneNode::addVehicleTo(irr::scene::ISceneNode* parent)
+{
+	m_vehicle = new Vehicle();
+	if (!m_vehicle->initVehicle(parent, m_sceneManager, MODEL_PATH + VEHICLE_MODEL_NAME_DEFAULT))
+		return false;
+
+//add spot light to vehicle
+	irr::scene::ILightSceneNode* m_lightNode = m_sceneManager->addLightSceneNode(m_vehicle->m_sceneNode,
+																				LIGHT_POSITION,
+																				LIGHT_COLOR, 
+																				LIGHT_RADIUS);
+	irr::video::SLight& light = m_lightNode->getLightData();
+	light.Type = irr::video::ELT_SPOT;
+	light.OuterCone = 40.0f;
+	m_lightNode->setRotation(irr::core::vector3df(0.0f, 180.0f, 0.0f));
+
+//navigation points
+	if (!m_navigationPoints.empty())
+	{
+		m_currentDistanceVector = m_navigationPoints[m_currentNavigationPointIndex];
+		m_distanceFullBNP = sqrtf(m_currentDistanceVector.X * m_currentDistanceVector.X + 
+										   m_currentDistanceVector.Y * m_currentDistanceVector.Y +
+										   m_currentDistanceVector.Z * m_currentDistanceVector.Z);
+		m_normalizedDistanceVector = m_currentDistanceVector / m_distanceFullBNP;
+		m_distancePassedBNP = 0.0f;
+
+//update rotation
+		irr::core::matrix4 absoluteTransformMatrix = m_vehicle->m_sceneNode->getAbsoluteTransformation();
+		irr::core::matrix4 rotationMatrix;
+		rotationMatrix.buildRotateFromTo(m_vehicle->m_speedVector, m_normalizedDistanceVector);
+		absoluteTransformMatrix = rotationMatrix * absoluteTransformMatrix;
+		m_vehicle->m_sceneNode->setRotation(absoluteTransformMatrix.getRotationDegrees());
+
+//update speed vector
+		m_vehicle->m_speedVector = m_normalizedDistanceVector * m_vehicle->m_speedScalar;
+		
+		m_lastTime = m_device->getTimer()->getTime();
+	}
+
+	return true;
+}
+
 bool LevelSceneNode::loadTestLevel()
 {
 	if (!m_sceneManager)
 		return false;
-/*
-	StraightRoomSceneNode* straightNode;
 
-	straightNode = new StraightRoomSceneNode(m_sceneManager->getRootSceneNode(),
-											m_sceneManager,
-											-1,
-											m_driver->getTexture(TEXTURE_PATH + ROOM_TEXTURE_NAME_DEFAULT),
-											STRAIGHT_SECTIONS_DEFAULT,
-											ROOM_PROPORTIONS,
-											irr::core::vector3df(0.0f, 0.0f, 0.0f),
-											irr::core::vector3df(0.0f, 0.0f, 0.0f),
-											ROOM_SCALE);
-	straightNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
-
-	CurveRoomSceneNode* curveNode;
-	curveNode = new CurveRoomSceneNode(m_sceneManager->getRootSceneNode(),
-										m_sceneManager,
-										D_UP,
-										90.0f,
-										CURVE_RADIUS,
-										CURVE_SECTIONS,
-										-1,
-										m_driver->getTexture(TEXTURE_PATH + ROOM_TEXTURE_NAME_DEFAULT),
-										ROOM_PROPORTIONS,
-										irr::core::vector3df(0.0f, 0.0f, 2 * ROOM_PROPORTIONS.Z * STRAIGHT_SECTIONS_DEFAULT * ROOM_SCALE.Z),
-										irr::core::vector3df(0.0f, 0.0f, 0.0f),
-										ROOM_SCALE);
-	curveNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
-	curveNode = new CurveRoomSceneNode(m_sceneManager->getRootSceneNode(),
-										m_sceneManager,
-										D_DOWN,
-										180.0f,
-										CURVE_RADIUS,
-										CURVE_SECTIONS,
-										-1,
-										m_driver->getTexture(TEXTURE_PATH + "wall.jpg"),
-										ROOM_PROPORTIONS,
-										irr::core::vector3df(0.0f, CURVE_RADIUS * ROOM_SCALE.Y, (CURVE_RADIUS + ROOM_PROPORTIONS.Z) * STRAIGHT_SECTIONS_DEFAULT * ROOM_SCALE.Z),
-										irr::core::vector3df(-90.0f, 0.0f, 0.0f),
-										ROOM_SCALE);
-	curveNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
-	curveNode = new CurveRoomSceneNode(m_sceneManager->getRootSceneNode(),
-										m_sceneManager,
-										D_RIGHT,
-										90.0f,
-										CURVE_RADIUS,
-										CURVE_SECTIONS,
-										-1,
-										m_driver->getTexture(TEXTURE_PATH + "wall.jpg"),
-										irr::core::vector3df(8.0f, 4.0f, 4.0f),
-										irr::core::vector3df(0.0f,-1000.0f,1760.0f),
-										irr::core::vector3df(0.0f, 0.0f,0.0f),
-										ROOM_SCALE);
-	curveNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
-	curveNode = new CurveRoomSceneNode(m_sceneManager->getRootSceneNode(),
-										m_sceneManager,
-										D_LEFT,
-										180.0f,
-										CURVE_RADIUS,
-										CURVE_SECTIONS,
-										-1,
-										m_driver->getTexture(TEXTURE_PATH + "wall.jpg"),
-										irr::core::vector3df(8.0f, 4.0f, 4.0f),
-										irr::core::vector3df(500.0f, -1000.0f, 2260.0f),
-										irr::core::vector3df(0.0f, 90.0f, 0.0f),
-										ROOM_SCALE);
-	curveNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
-	//curveNode->drop();
-	
-	//test wall
-	addObstacleTo(straightNode, 0, OT_WALL, OP_LEFT_1_2);
-	addObstacleTo(straightNode, 1, OT_WALL, OP_LEFT_2_3);
-	addObstacleTo(straightNode, 2, OT_WALL, OP_RIGHT_1_2);
-	addObstacleTo(straightNode, 3, OT_WALL, OP_RIGHT_2_3);
-	addObstacleTo(straightNode, 4, OT_WALL, OP_BOTTOM_1_2);
-	addObstacleTo(straightNode, 5, OT_WALL, OP_BOTTOM_2_3);
-	addObstacleTo(straightNode, 6, OT_WALL, OP_TOP_1_2);
-	addObstacleTo(straightNode, 7, OT_WALL, OP_TOP_2_3);
-	addObstacleTo(straightNode, 9, OT_WALL, OP_TOP_1_2);
-*/
 	//add vehicle
 	irr::scene::IMesh* mesh = m_sceneManager->getMesh(MODEL_PATH + "Vehicle\\Feisar_Ship.3DS");
     if (!mesh)
@@ -120,12 +98,6 @@ bool LevelSceneNode::loadTestLevel()
 	node->setScale(irr::core::vector3df(0.05f, 0.05f, 0.05f));
 	node->setParent(m_sceneManager->getActiveCamera());
 	node->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
-/*	irr::scene::ISceneNodeAnimator* anim = m_sceneManager->createRotationAnimator(irr::core::vector3df(0.0f,0.4f,0.0f));
-		if (anim)
-		{
-			node->addAnimator(anim);
-			anim->drop();
-		}*/
 	
 	irr::scene::ILightSceneNode* lightNode = m_sceneManager->addLightSceneNode(0,
 																				irr::core::vector3df(0.0f , 0.0f, -50.0f),
@@ -134,12 +106,7 @@ bool LevelSceneNode::loadTestLevel()
 	irr::video::SLight& light = lightNode->getLightData();
 	light.Type = irr::video::ELT_SPOT;
 	light.OuterCone = 40.0f;
-	//lightNode->setRotation(irr::core::vector3df(0.0f ,0.0f, 0.0f));
 	lightNode->setParent(m_sceneManager->getActiveCamera());
-	//animator fly circle
-	//anim = m_sceneManager->createFlyCircleAnimator (irr::core::vector3df(0,0,0), 20.0f);
-	//lightNode->addAnimator(anim);
-	//anim->drop();
 
 	return true;									
 }
@@ -207,6 +174,14 @@ bool LevelSceneNode::loadLevelFromXML(const irr::io::path& filePath)
 		}
 	}
 
+//vehicle
+	if (!addVehicleTo(m_sceneManager->getRootSceneNode()))
+		return false;
+
+	m_cameraNode = m_sceneManager->addCameraSceneNode(m_vehicle->m_sceneNode);
+	m_cameraNode->setPosition(CAMERA_POSITION);
+	m_cameraNode->setTarget(m_vehicle->m_speedVector * 1000.0f);
+
 	xml->drop();
 
 	return true;
@@ -230,6 +205,59 @@ void LevelSceneNode::render()
 
 }
 
+void LevelSceneNode::update()
+{
+	irr::u32 newTime = m_device->getTimer()->getTime();
+	irr::f32 deltaTime = (float)(newTime - m_lastTime) / 1000.0f;
+	m_lastTime = newTime;
+
+	if (m_vehicle && !m_finished)
+	{
+		irr::core::vector3df vehiclePosition = m_vehicle->m_sceneNode->getPosition();
+		irr::core::vector3df leftToNavPointVector = m_normalizedDistanceVector * (m_distanceFullBNP - m_distancePassedBNP);
+		m_distancePassedBNP += m_vehicle->m_speedScalar * deltaTime;
+		if (m_distancePassedBNP > m_distanceFullBNP)
+		{
+			m_distancePassedBNP = m_distancePassedBNP - m_distanceFullBNP;
+			m_currentNavigationPointIndex++;
+			if (m_currentNavigationPointIndex >= m_navigationPoints.size())
+			{
+				m_finished = true;
+				return;
+			}
+			m_currentDistanceVector = m_navigationPoints[m_currentNavigationPointIndex] - m_navigationPoints[m_currentNavigationPointIndex-1];
+			m_distanceFullBNP = sqrtf(m_currentDistanceVector.X * m_currentDistanceVector.X + 
+										   m_currentDistanceVector.Y * m_currentDistanceVector.Y +
+										   m_currentDistanceVector.Z * m_currentDistanceVector.Z);
+			m_normalizedDistanceVector = m_currentDistanceVector / m_distanceFullBNP;
+
+//update rotation
+			irr::core::matrix4 absoluteTransformMatrix = m_vehicle->m_sceneNode->getAbsoluteTransformation();
+			irr::core::matrix4 rotationMatrix;
+			rotationMatrix.buildRotateFromTo(m_vehicle->m_speedVector, m_normalizedDistanceVector);
+			//absoluteTransformMatrix = absoluteTransformMatrix * rotationMatrix;
+			absoluteTransformMatrix = rotationMatrix * absoluteTransformMatrix;
+			m_vehicle->m_sceneNode->setRotation(absoluteTransformMatrix.getRotationDegrees());
+
+//update speed vector
+			m_vehicle->m_speedVector = m_normalizedDistanceVector * m_vehicle->m_speedScalar;
+
+			vehiclePosition += leftToNavPointVector + m_normalizedDistanceVector * m_distancePassedBNP;
+
+//update camera target
+			m_cameraNode->setTarget(vehiclePosition + (m_normalizedDistanceVector * 1000.0f));
+		}
+		else
+		{
+			vehiclePosition += m_vehicle->m_speedVector * deltaTime;
+		}
+
+		m_vehicle->m_sceneNode->setPosition(vehiclePosition);
+		
+		//m_vehicle->update(deltaTime);
+	}
+}
+
 bool LevelSceneNode::addStraightNode(irr::u32 sectionsCount, irr::core::stringw initString)
 {
 	if (!m_sceneManager)
@@ -244,6 +272,18 @@ bool LevelSceneNode::addStraightNode(irr::u32 sectionsCount, irr::core::stringw 
 											m_currentFaceRotation,
 											ROOM_SCALE);
 	straightNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
+
+//add navigation points
+	const irr::u32 vertexCount = straightNode->getVertexCount();
+	const irr::video::S3DVertex* vertices = straightNode->getVertices();
+	irr::core::matrix4 absoluteTransform = straightNode->getAbsoluteTransformation();
+	irr::core::vector3df navigationPoint;
+	for (irr::u32 i = 4; i < vertexCount; i+=4)
+	{
+		navigationPoint = (vertices[i].Pos + vertices[2+i].Pos) / 2.0f;
+		absoluteTransform.transformVect(navigationPoint);
+		m_navigationPoints.push_back(navigationPoint);
+	}
 
 //adding obstacles to node
 	for (irr::u32 i = 0; i < initString.size(); i++)
@@ -286,19 +326,22 @@ bool LevelSceneNode::addStraightNode(irr::u32 sectionsCount, irr::core::stringw 
 	transformMatrix.transformVect(newTranslation);
 	m_currentFacePosition += newTranslation;
 
+//add to node blocks array
+	//m_nodeBlocks.push_back(NodeBlock(BT_STRAIGHT, D_FORWARD, 0.0f, sectionsCount, initString));
+
 	straightNode->drop();
 
 	return true;
 }
 
-bool LevelSceneNode::addCurveNode(irr::u32 sectionsNumber, irr::f32 angle, DIRECTION direction, irr::core::stringw initString)
+bool LevelSceneNode::addCurveNode(irr::u32 sectionsCount, irr::f32 angle, DIRECTION direction, irr::core::stringw initString)
 {
 	CurveRoomSceneNode* curveNode = new CurveRoomSceneNode(this,
 										m_sceneManager,
 										direction,
 										angle,
 										CURVE_RADIUS,
-										sectionsNumber,
+										sectionsCount,
 										-1,
 										m_driver->getTexture(TEXTURE_PATH + ROOM_TEXTURE_NAME_DEFAULT),
 										ROOM_PROPORTIONS,
@@ -306,7 +349,18 @@ bool LevelSceneNode::addCurveNode(irr::u32 sectionsNumber, irr::f32 angle, DIREC
 										m_currentFaceRotation,
 										ROOM_SCALE);
 	curveNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
-	curveNode->drop();
+
+//add navigation points
+	const irr::u32 vertexCount = curveNode->getVertexCount();
+	const irr::video::S3DVertex* vertices = curveNode->getVertices();
+	irr::core::matrix4 absoluteTransform = curveNode->getAbsoluteTransformation();
+	irr::core::vector3df navigationPoint;
+	for (irr::u32 i = 4; i < vertexCount; i+=4)
+	{
+		navigationPoint = (vertices[i].Pos + vertices[2+i].Pos) / 2.0f;
+		absoluteTransform.transformVect(navigationPoint);
+		m_navigationPoints.push_back(navigationPoint);
+	}
 
 //changing current face position and rotation
 	irr::core::vector3df newRotation;
@@ -340,6 +394,11 @@ bool LevelSceneNode::addCurveNode(irr::u32 sectionsNumber, irr::f32 angle, DIREC
 	newRotationMatrix = transformMatrix * newRotationMatrix;
 	m_currentFaceRotation = newRotationMatrix.getRotationDegrees();
 	m_currentFacePosition += newTranslation;
+
+//add to node blocks array
+	//m_nodeBlocks.push_back(NodeBlock(BT_STRAIGHT, D_FORWARD, 0.0f, sectionsCount, initString));
+
+	curveNode->drop();
 
 	return true;
 }

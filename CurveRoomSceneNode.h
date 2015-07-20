@@ -48,6 +48,8 @@ public:
 	virtual const irr::core::aabbox3d<irr::f32>& getBoundingBox() const;
 	virtual irr::u32 getMaterialCount() const;
 	virtual irr::video::SMaterial& getMaterial(irr::u32 i);
+	virtual irr::u32 getVertexCount() const;
+	virtual const irr::video::S3DVertex* getVertices() const;
 };
 
 #endif

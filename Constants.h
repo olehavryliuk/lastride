@@ -6,6 +6,7 @@
 #include <irrString.h>
 #include <EDriverTypes.h>
 #include <vector3d.h>
+#include <SColor.h>
 
 //screen resolution
 extern const irr::u32 SCREEN_WIDTH_DEFAULT;
@@ -34,6 +35,7 @@ extern const irr::core::stringw DEFAULT_FONT;
 //Resources names
 extern const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT;
 extern const irr::core::stringw WALL_TEXTURE_NAME_DEFAULT;
+extern const irr::core::stringw VEHICLE_MODEL_NAME_DEFAULT;
 
 //Debug
 extern const bool SHOW_FPS;
@@ -42,6 +44,18 @@ extern const bool SHOW_FPS;
 extern const irr::core::vector3df ROOM_PROPORTIONS;
 extern const irr::core::vector3df ROOM_SCALE;
 extern const irr::f32 WALL_WIDTH;
+
+//Vehicle
+extern const irr::core::vector3df VEHICLE_SCALE;
+extern const irr::core::vector3df VEHICLE_START_SPEED;
+
+//Camera
+extern const irr::core::vector3df CAMERA_POSITION;
+
+//Light
+extern const irr::core::vector3df LIGHT_POSITION;
+extern const irr::video::SColorf LIGHT_COLOR;
+extern const irr::f32 LIGHT_RADIUS;
 
 //CurveRoomSceneNode
 #define MAX_CURVE_SECTIONS 10

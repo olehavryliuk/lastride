@@ -26,6 +26,7 @@ private:
 	OptionsMenu* m_optionsMenu;					//strong ref
 	GameEventReceiver* m_eventReceiver;			//strong ref
 	LevelSceneNode* m_levelSceneNode;			//weak ref
+
 	irr::scene::ICameraSceneNode* m_FPSCamera;	//weak rer
 	GAME_STATE m_gameState;
 
@@ -36,6 +37,7 @@ public:
 	bool initialize();
 	bool loadTestLevel();
 	bool loadLevelFromXML(const irr::io::path& filePath);
+	void update();
 	void run();
 	irr::IrrlichtDevice* getDevice();
 

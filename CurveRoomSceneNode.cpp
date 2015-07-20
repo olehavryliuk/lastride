@@ -75,7 +75,7 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 	{
 		irr::f32 x_0_3, x_1_2, z_0_3, z_1_2;
 
-		for (irr::s32 i = 0; i < m_sectionCount + 1; i++)
+		for (irr::u8 i = 0; i < m_sectionCount + 1; i++)
 		{
 			cosinus = cos(m_sectionAngle * i);
 			sinus = sin(m_sectionAngle * i);
@@ -106,7 +106,7 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 	{
 		irr::f32 x_0_3, x_1_2, z_0_3, z_1_2;
 		
-		for (irr::s32 i = 0; i < m_sectionCount + 1; i++)
+		for (irr::u8 i = 0; i < m_sectionCount + 1; i++)
 		{
 			cosinus = cos(m_sectionAngle * i);
 			sinus = sin(m_sectionAngle * i);
@@ -137,7 +137,7 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 	{
 		irr::f32 y_0_1, y_2_3, z_1_2, z_3_4;
 
-		for (irr::s32 i = 0; i < m_sectionCount + 1; i++)
+		for (irr::u8 i = 0; i < m_sectionCount + 1; i++)
 		{
 			cosinus = cos(m_sectionAngle * i);
 			sinus = sin(m_sectionAngle * i);
@@ -171,7 +171,7 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 	{
 		irr::f32 y_0_1, y_2_3, z_1_2, z_3_4;
 
-		for (irr::s32 i = 0; i < m_sectionCount + 1; i++)
+		for (irr::u8 i = 0; i < m_sectionCount + 1; i++)
 		{
 			cosinus = cos(m_sectionAngle * i);
 			sinus = sin(m_sectionAngle * i);
@@ -203,7 +203,7 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 	}
 
 	// create indices
-	for (irr::s32 i = 0; i < 4 * m_sectionCount; i++)
+	for (irr::u8 i = 0; i < 4 * m_sectionCount; i++)
 	{
 		m_indices[0+6*i] = 0 + i;
 		m_indices[1+6*i] = 4 + i;
@@ -254,4 +254,14 @@ irr::u32 CurveRoomSceneNode::getMaterialCount() const
 irr::video::SMaterial& CurveRoomSceneNode::getMaterial(irr::u32 i)
 {
 	return m_material;
+}
+
+irr::u32 CurveRoomSceneNode::getVertexCount() const
+{
+	return m_verticesCount;
+}
+
+const irr::video::S3DVertex* CurveRoomSceneNode::getVertices() const
+{
+	return m_vertices;
 }
