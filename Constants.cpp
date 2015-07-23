@@ -39,16 +39,17 @@ const irr::core::vector3df ROOM_SCALE = irr::core::vector3df(10.0f, 10.0f, 10.0f
 const irr::f32 WALL_WIDTH = 0.2f;
 
 //Vehicle
-const irr::core::vector3df VEHICLE_SCALE = irr::core::vector3df(0.2f, 0.2f, 0.2f);
-const irr::core::vector3df VEHICLE_START_SPEED = irr::core::vector3df(0.0f, 0.0f, 300.0f);
+const irr::core::vector3df VEHICLE_SCALE = irr::core::vector3df(0.15f, 0.15f, 0.15f);
+const irr::core::vector3df VEHICLE_START_SPEED = irr::core::vector3df(0.0f, 0.0f, 700.0f);
 
 //Camera
-const irr::core::vector3df CAMERA_POSITION = irr::core::vector3df(0.0f, 200.0f, 300.0f);
+const irr::core::vector3df CAMERA_POSITION = irr::core::vector3df(0.0f, 130.0f, 170.0f);
+const irr::f32 CAMERA_TARGET_DISTANCE = 10000000.0f;
 
 //Light
-const irr::core::vector3df LIGHT_POSITION = irr::core::vector3df(0.0f , 100.0f, 200.0f);
+const irr::core::vector3df LIGHT_POSITION = irr::core::vector3df(0.0f , 150.0f, 300.0f);
 const irr::video::SColorf LIGHT_COLOR = irr::video::SColorf(1.0f, 1.0f, 1.0f, 1.0f);
-const irr::f32 LIGHT_RADIUS = 800.0f;
+const irr::f32 LIGHT_RADIUS = 1000.0f;
 
 //CurveSceneNode
 const irr::u8 CURVE_SECTIONS = 10;
@@ -56,3 +57,6 @@ const irr::f32 CURVE_RADIUS = 70.0f;
 
 //StraightRoomSceneNode
 const irr::u8 STRAIGHT_SECTIONS_DEFAULT = 10;
+
+//Input
+const irr::f32 KEY_REACTION_SPEED_DEFAULT = 1500.0f;

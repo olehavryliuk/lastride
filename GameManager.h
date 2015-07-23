@@ -29,6 +29,7 @@ private:
 
 	irr::scene::ICameraSceneNode* m_FPSCamera;	//weak rer
 	GAME_STATE m_gameState;
+	irr::u32 m_lastTime;
 
 public:
 	GameManager();
@@ -40,8 +41,9 @@ public:
 	void update();
 	void run();
 	irr::IrrlichtDevice* getDevice();
+	const GameEventReceiver* getEventReceiver();
 
-	bool addFPSCamera();
+	//bool addFPSCamera();
 };
 
 #endif

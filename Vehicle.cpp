@@ -25,6 +25,7 @@ bool Vehicle::initVehicle(irr::scene::ISceneNode* parent, irr::scene::ISceneMana
 	m_sceneNode = sceneManager->addMeshSceneNode(mesh, parent);
 	m_sceneNode->setScale(VEHICLE_SCALE);
 	m_sceneNode->setRotation(irr::core::vector3df(0.0f, 180.0f, 0.0f));
+	//m_sceneNode->setPosition(irr::core::vector3df(0.0f, -CAMERA_POSITION.Y * VEHICLE_SCALE.Y, 0.0f));
 	m_sceneNode->updateAbsolutePosition();
 	m_sceneNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
 

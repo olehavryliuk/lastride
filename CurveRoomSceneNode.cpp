@@ -167,7 +167,7 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 													  t, o + t * (float)i);
 		}
 	}
-	else //m_direction == D_UP
+	else if(m_direction == D_UP)
 	{
 		irr::f32 y_0_1, y_2_3, z_1_2, z_3_4;
 

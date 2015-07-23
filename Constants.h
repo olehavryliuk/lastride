@@ -51,6 +51,8 @@ extern const irr::core::vector3df VEHICLE_START_SPEED;
 
 //Camera
 extern const irr::core::vector3df CAMERA_POSITION;
+extern const irr::f32 CAMERA_TARGET_DISTANCE;
+
 
 //Light
 extern const irr::core::vector3df LIGHT_POSITION;
@@ -65,5 +67,8 @@ extern const irr::f32 CURVE_RADIUS;
 //StraightRoomSceneNode
 #define MAX_STRAIGHT_SECTIONS 100
 extern const irr::u8 STRAIGHT_SECTIONS_DEFAULT;
+
+//Input
+extern const irr::f32 KEY_REACTION_SPEED_DEFAULT;
 
 #endif

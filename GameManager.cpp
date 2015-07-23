@@ -9,6 +9,7 @@ GameManager::GameManager()
 	m_eventReceiver = nullptr;
 	m_levelSceneNode = nullptr;
 	m_FPSCamera = nullptr;
+	m_lastTime = 0;
 	m_gameState = GS_MAIN_MENU;
 }
 
@@ -71,11 +72,11 @@ irr::IrrlichtDevice* GameManager::getDevice()
 bool GameManager::loadTestLevel()
 {
 	if (!m_levelSceneNode)
-		m_levelSceneNode = new LevelSceneNode(m_device, m_sceneManager->getRootSceneNode(), m_sceneManager);
+		m_levelSceneNode = new LevelSceneNode(this ,m_device, m_sceneManager->getRootSceneNode(), m_sceneManager);
 	if (!m_levelSceneNode)
 		return false;
 
-	addFPSCamera();
+	//addFPSCamera();
 	m_levelSceneNode->loadTestLevel();
 
 	m_gameState = GS_PLAYING;
@@ -89,7 +90,7 @@ bool GameManager::loadTestLevel()
 
 bool GameManager::loadLevelFromXML(const irr::io::path& filePath)
 {
-	m_levelSceneNode = new LevelSceneNode(m_device, m_sceneManager->getRootSceneNode(), m_sceneManager);
+	m_levelSceneNode = new LevelSceneNode(this, m_device, m_sceneManager->getRootSceneNode(), m_sceneManager);
 	if (!m_levelSceneNode)
 		return false;
 
@@ -102,13 +103,17 @@ bool GameManager::loadLevelFromXML(const irr::io::path& filePath)
 
 	m_levelSceneNode->drop();
 
-	//m_mainMenu->setActive(false);
+	m_mainMenu->setActive(false);
 
 	return true;
 }
 
 void GameManager::update()
 {
+	irr::u32 newTime = m_device->getTimer()->getTime();
+	irr::u32 deltaTime = newTime - m_lastTime;
+	m_lastTime = newTime;
+
 	m_levelSceneNode->update();
 }
 
@@ -128,10 +133,15 @@ void GameManager::run()
 
 	m_driver->endScene();
 }
-
+/*
 bool GameManager::addFPSCamera()
 {
 	if(m_FPSCamera = m_sceneManager->addCameraSceneNodeFPS())
 		return true;
 	return false;
+}*/
+
+const GameEventReceiver* GameManager::getEventReceiver()
+{
+	return m_eventReceiver;
 }

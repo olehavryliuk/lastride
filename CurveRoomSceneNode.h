@@ -13,7 +13,8 @@ enum DIRECTION
 	D_RIGHT		= 2,
 	D_LEFT		= 3,
 	D_FORWARD	= 4,
-	D_BACKWARD  = 5
+	D_BACKWARD  = 5,
+	D_NONE		= 6
 };
 
 class CurveRoomSceneNode : public irr::scene::ISceneNode

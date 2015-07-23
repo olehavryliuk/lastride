@@ -5,6 +5,8 @@
 #include <irrlicht.h>
 #include "CurveRoomSceneNode.h"
 #include "Vehicle.h"
+
+class GameManager;
 /*
 enum BLOCK_TYPE
 {
@@ -48,10 +50,12 @@ class IObstacle;
 class LevelSceneNode : public irr::scene::ISceneNode
 {
 protected:
-	irr::IrrlichtDevice* m_device;               //weak ref
+	GameManager* m_gameManager;					//weak ref	
+	irr::IrrlichtDevice* m_device;              //weak ref
 	irr::video::IVideoDriver* m_driver;			//weak ref
 	irr::scene::ISceneManager* m_sceneManager;	//weak ref
 	irr::core::aabbox3d<irr::f32> m_box;
+
 	IObstacle* m_currentObstacle;				//weak ref
 	irr::core::stringw m_obstacleString;
 	irr::u32 m_currentSection;
@@ -62,7 +66,21 @@ protected:
 	irr::scene::ICameraSceneNode* m_cameraNode;	//weak ref
 	irr::scene::ILightSceneNode* m_lightNode;	//weak ref
 	irr::u32 m_lastTime;
+
+//game logic flags
 	bool m_finished;
+	bool m_isScratchingWalls;
+	DIRECTION m_scratchedWallLR;
+	DIRECTION m_scratchedWallDU;
+
+	bool m_animatingCameraTarget;
+//camera target animation
+//	irr::u32 m_cameraTargetAnimationCount;
+//	irr::u32 m_cameraTargetAnimationStep;
+	irr::core::vector3df m_cameraTargetAnimationDelta;
+	irr::core::vector3df m_cameraTargetAnimationStart;
+	irr::core::vector3df m_cameraTargetAnimationEnd;
+	irr::core::vector3df m_currentCameraTarget;
 
 //navigation points array
 	irr::core::array<irr::core::vector3df> m_navigationPoints;
@@ -72,6 +90,10 @@ protected:
 	irr::f32 m_distanceFullBNP;
 	irr::f32 m_distancePassedBNP;
 
+
+//input
+	irr::core::vector3df m_inputPositionDelta;
+
 //node blocks array
 //	irr::core::array<NodeBlock> m_nodeBlocks;
 //	irr::u32 m_currentNodeBlockIndex;
@@ -80,9 +102,18 @@ protected:
 	bool addStraightNode(irr::u32 sectionsCount, irr::core::stringw initString);
 	bool addCurveNode(irr::u32 sectionsCount, irr::f32 angle, DIRECTION direction, irr::core::stringw initString = "");
 	bool addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sectionNumber, OBSTACLE_TYPE obstacleType, OBSTACLE_POSITION obstaclePosition);
+	bool addCameraTo(irr::scene::ISceneNode* parent);
+	void resetLevel();
+	
+	void checkForWallCollisions();
+
+//camera target animation
+	void startCameraTargetAnimation(irr::core::vector3df startPosition, irr::core::vector3df endPosition);
+	void animateCameraTarget();
 
 public:
-	LevelSceneNode(irr::IrrlichtDevice* device,
+	LevelSceneNode(GameManager* gameManager,
+				   irr::IrrlichtDevice* device,
 				   irr::scene::ISceneNode* parent, 
 				   irr::scene::ISceneManager* sceneManager);
 	~LevelSceneNode();
@@ -92,6 +123,7 @@ public:
 	virtual void OnRegisterSceneNode();
 	virtual void update();
 	virtual void render();
+	virtual void processInput(irr::f32 deltaTimeInSeconds);
 };
 
 #endif
