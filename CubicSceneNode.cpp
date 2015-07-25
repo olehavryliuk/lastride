@@ -12,8 +12,6 @@ CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent,
 								irr::scene::ISceneNode(parent, mgr, id, position, rotation, scale)
 {
 	setAutomaticCulling(irr::scene::EAC_OFF);
-	m_box.MaxEdge.set(0,0,0);
-	m_box.MinEdge.set(0,0,0);
 
 	// create m_material
 	m_material.Lighting = true;
@@ -80,10 +78,9 @@ CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent,
 	m_indices[33] = 5;
 	m_indices[34] = 7;
 	m_indices[35] = 4;
-	/*
+
 	m_box.reset(m_vertices[0].Pos);
-	for (irr::s32 i = 1; i < 12; ++i)
-		m_box.addInternalPoint(m_vertices[i].Pos);	*/					 
+	m_box.addInternalPoint(m_vertices[6].Pos);				 
 }
 
 void CubicSceneNode::OnRegisterSceneNode()

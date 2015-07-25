@@ -68,7 +68,13 @@ extern const irr::f32 CURVE_RADIUS;
 #define MAX_STRAIGHT_SECTIONS 100
 extern const irr::u8 STRAIGHT_SECTIONS_DEFAULT;
 
+//Obstacles
+extern const irr::f32 BOX_INCREASE_MULTIPLIER;
+
 //Input
 extern const irr::f32 KEY_REACTION_SPEED_DEFAULT;
+extern const irr::f32 WALL_SIDE_MARGIN;
+extern const irr::f32 WALL_BOTTOM_MARGIN;
+extern const irr::f32 WALL_TOP_MARGIN;
 
 #endif

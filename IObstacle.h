@@ -7,7 +7,9 @@ class irr::scene::ISceneNode;
 class IObstacle
 {
 public:
+	virtual ~IObstacle(){}
 	virtual bool intersectsWithObject(irr::scene::ISceneNode* object) = 0;
+	virtual bool isNearObject(irr::scene::ISceneNode* object) = 0;
 };
 
 #endif

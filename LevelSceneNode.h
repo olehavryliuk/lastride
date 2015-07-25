@@ -13,19 +13,18 @@ enum BLOCK_TYPE
 	BT_STRAIGHT = 0,
 	BT_CURVE	= 1
 };
-
+*/
 struct NodeBlock
 {
-	BLOCK_TYPE m_blockType;
 	DIRECTION m_direction;
-	irr::f32 m_angle;
 	irr::u32 m_sectionCount;
+	irr::f32 m_angle;
 	irr::core::stringw m_obstacleString;
 
-	NodeBlock(BLOCK_TYPE blockType, DIRECTION direction, irr::f32 angle, irr::u32 sectionCount, irr::core::stringw obstacleString) :
-			m_blockType(blockType), m_direction(direction), m_angle(angle), m_sectionCount(sectionCount), m_obstacleString(obstacleString)
+	NodeBlock(DIRECTION direction, irr::u32 sectionCount, irr::f32 angle, irr::core::stringw obstacleString) :
+			m_direction(direction), m_sectionCount(sectionCount), m_angle(angle), m_obstacleString(obstacleString)
 	{}
-};*/
+};
 
 enum OBSTACLE_TYPE
 {
@@ -56,9 +55,12 @@ protected:
 	irr::scene::ISceneManager* m_sceneManager;	//weak ref
 	irr::core::aabbox3d<irr::f32> m_box;
 
-	IObstacle* m_currentObstacle;				//weak ref
-	irr::core::stringw m_obstacleString;
-	irr::u32 m_currentSection;
+//obstacles
+	irr::core::array<IObstacle*> m_obstacles;
+	irr::u32 m_currentObstacleIndex;
+	irr::core::aabbox3d<irr::f32> m_wideCurrentObstacleBox;
+	bool m_wasNearCurrentObstacle;
+
 	irr::scene::ISceneNode* m_currentRoomNode;	//weak ref
 	irr::core::vector3df m_currentFacePosition;
 	irr::core::vector3df m_currentFaceRotation;
@@ -75,8 +77,6 @@ protected:
 
 	bool m_animatingCameraTarget;
 //camera target animation
-//	irr::u32 m_cameraTargetAnimationCount;
-//	irr::u32 m_cameraTargetAnimationStep;
 	irr::core::vector3df m_cameraTargetAnimationDelta;
 	irr::core::vector3df m_cameraTargetAnimationStart;
 	irr::core::vector3df m_cameraTargetAnimationEnd;
@@ -89,14 +89,17 @@ protected:
 	irr::core::vector3df m_normalizedDistanceVector;
 	irr::f32 m_distanceFullBNP;
 	irr::f32 m_distancePassedBNP;
-
+	irr::f32 m_distanceBNPInputDelta;
 
 //input
 	irr::core::vector3df m_inputPositionDelta;
 
 //node blocks array
-//	irr::core::array<NodeBlock> m_nodeBlocks;
-//	irr::u32 m_currentNodeBlockIndex;
+	irr::core::array<NodeBlock> m_nodeBlocks;
+	irr::u32 m_currentNodeBlockIndex;
+	irr::u32 m_currentSectionIndex;
+
+	void updateNodeBlocksIndex();
 
 	bool addVehicleTo(irr::scene::ISceneNode* parent);
 	bool addStraightNode(irr::u32 sectionsCount, irr::core::stringw initString);
@@ -106,6 +109,8 @@ protected:
 	void resetLevel();
 	
 	void checkForWallCollisions();
+
+	void checkForObstacleCollisions();
 
 //camera target animation
 	void startCameraTargetAnimation(irr::core::vector3df startPosition, irr::core::vector3df endPosition);

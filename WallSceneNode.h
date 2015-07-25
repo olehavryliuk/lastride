@@ -18,6 +18,7 @@ public:
 					const irr::core::vector3df& scale = irr::core::vector3df(1.0f, 1.0f, 1.0f));
 
 	virtual bool intersectsWithObject(ISceneNode* object);
+	virtual bool isNearObject(irr::scene::ISceneNode* object);
 };
 
 #endif

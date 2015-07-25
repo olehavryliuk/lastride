@@ -2,8 +2,8 @@
 #include "Constants.h"
 
 //screen resolution
-const irr::u32 SCREEN_WIDTH_DEFAULT = 1280;
-const irr::u32 SCREEN_HEIGHT_DEFAULT = 1024;
+const irr::u32 SCREEN_WIDTH_DEFAULT = 640;
+const irr::u32 SCREEN_HEIGHT_DEFAULT = 480;
 
 //default device
 const irr::video::E_DRIVER_TYPE VIDEO_DRIVER_TYPE = irr::video::EDT_DIRECT3D9;
@@ -34,13 +34,13 @@ const irr::core::stringw VEHICLE_MODEL_NAME_DEFAULT = L"Vehicle/Feisar_Ship.3DS"
 const bool SHOW_FPS = true;
 
 //Room proportions
-const irr::core::vector3df ROOM_PROPORTIONS = irr::core::vector3df(10.0f, 6.0f, 10.0f);
+const irr::core::vector3df ROOM_PROPORTIONS = irr::core::vector3df(12.0f, 8.0f, 12.0f);
 const irr::core::vector3df ROOM_SCALE = irr::core::vector3df(10.0f, 10.0f, 10.0f);
 const irr::f32 WALL_WIDTH = 0.2f;
 
 //Vehicle
 const irr::core::vector3df VEHICLE_SCALE = irr::core::vector3df(0.15f, 0.15f, 0.15f);
-const irr::core::vector3df VEHICLE_START_SPEED = irr::core::vector3df(0.0f, 0.0f, 700.0f);
+const irr::core::vector3df VEHICLE_START_SPEED = irr::core::vector3df(0.0f, 0.0f, 600.0f);
 
 //Camera
 const irr::core::vector3df CAMERA_POSITION = irr::core::vector3df(0.0f, 130.0f, 170.0f);
@@ -53,10 +53,16 @@ const irr::f32 LIGHT_RADIUS = 1000.0f;
 
 //CurveSceneNode
 const irr::u8 CURVE_SECTIONS = 10;
-const irr::f32 CURVE_RADIUS = 70.0f;
+const irr::f32 CURVE_RADIUS = 100.0f;
 
 //StraightRoomSceneNode
 const irr::u8 STRAIGHT_SECTIONS_DEFAULT = 10;
 
+//Obstacles
+const irr::f32 BOX_INCREASE_MULTIPLIER = 4.0f;
+
 //Input
-const irr::f32 KEY_REACTION_SPEED_DEFAULT = 1500.0f;
+const irr::f32 KEY_REACTION_SPEED_DEFAULT = 2500.0f;
+const irr::f32 WALL_SIDE_MARGIN = 5.0f;
+const irr::f32 WALL_BOTTOM_MARGIN = 5.0f;
+const irr::f32 WALL_TOP_MARGIN = 30.0f;

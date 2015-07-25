@@ -16,12 +16,16 @@ LevelSceneNode::LevelSceneNode(GameManager* gameManager,
 	m_device = device;
 	m_driver = device->getVideoDriver();
 	m_sceneManager = device->getSceneManager();
-	m_currentObstacle = nullptr;
+
+//obstacles
+	m_currentObstacleIndex = 0;				
+	m_wasNearCurrentObstacle = false;
+
 	m_currentRoomNode = nullptr;
 	m_vehicle= nullptr;
 	m_cameraNode = nullptr;
 	m_lightNode = nullptr;
-	m_currentSection = 0;
+	m_currentSectionIndex = 0;
 	m_currentFacePosition = irr::core::vector3df(0.0f, 0.0f, 0.0f);
 	m_currentFaceRotation = irr::core::vector3df(0.0f, 0.0f, 0.0f);
 	m_lastTime = 0;
@@ -41,10 +45,15 @@ LevelSceneNode::LevelSceneNode(GameManager* gameManager,
 	m_currentNavigationPointIndex = 0;
 	m_distanceFullBNP = 0.0f;
 	m_distancePassedBNP = 0.0f;
+	m_distanceBNPInputDelta = 0.0f;
 
 	setAutomaticCulling(irr::scene::EAC_OFF);
 	m_box.MaxEdge.set(0,0,0);
 	m_box.MinEdge.set(0,0,0);
+
+//node blocks
+	m_currentNodeBlockIndex = 0;
+	m_currentSectionIndex = 0;
 
 //input
 	m_inputPositionDelta = irr::core::vector3df(0.0f, 0.0f, 0.0f);
@@ -135,10 +144,11 @@ bool LevelSceneNode::loadLevelFromXML(const irr::io::path& filePath)
 	if (!xml)
 		return false;
 
-	irr::core::stringw currentNode;
-	irr::core::stringw attribute;
-	irr::u32 sectionsCount;
-	irr::f32 angle;
+	irr::core::stringw currentNode = L"";
+	irr::core::stringw attribute = L"";
+	irr::core::stringw obstacleString = L"";
+	irr::u32 sectionsCount = 0;
+	irr::f32 angle = 0;
 
 	while (xml->read())
 	{
@@ -150,30 +160,35 @@ bool LevelSceneNode::loadLevelFromXML(const irr::io::path& filePath)
 				if (currentNode.equals_ignore_case(L"straight"))
 				{
 					sectionsCount = xml->getAttributeValueAsInt(L"sections");
+					angle = 0.0f;
 				}
 				else if (currentNode.equals_ignore_case(L"left"))
 				{
 					sectionsCount = xml->getAttributeValueAsInt(L"sections");
 					angle = xml->getAttributeValueAsFloat(L"angle");
 					addCurveNode(sectionsCount, angle, D_LEFT);
+					m_nodeBlocks.push_back(NodeBlock(D_LEFT, sectionsCount, angle, L""));
 				}
 				else if (currentNode.equals_ignore_case(L"right"))
 				{
 					sectionsCount = xml->getAttributeValueAsInt(L"sections");
 					angle = xml->getAttributeValueAsFloat(L"angle");
-					addCurveNode(sectionsCount, angle, D_RIGHT);				
+					addCurveNode(sectionsCount, angle, D_RIGHT);
+					m_nodeBlocks.push_back(NodeBlock(D_RIGHT, sectionsCount, angle, L""));
 				}
 				else if (currentNode.equals_ignore_case(L"down"))
 				{
 					sectionsCount = xml->getAttributeValueAsInt(L"sections");
 					angle = xml->getAttributeValueAsFloat(L"angle");
-					addCurveNode(sectionsCount, angle, D_DOWN);				
+					addCurveNode(sectionsCount, angle, D_DOWN);
+					m_nodeBlocks.push_back(NodeBlock(D_DOWN, sectionsCount, angle, L""));
 				}
 				else if (currentNode.equals_ignore_case(L"up"))
 				{
 					sectionsCount = xml->getAttributeValueAsInt(L"sections");
 					angle = xml->getAttributeValueAsFloat(L"angle");
-					addCurveNode(sectionsCount, angle, D_UP);				
+					addCurveNode(sectionsCount, angle, D_UP);
+					m_nodeBlocks.push_back(NodeBlock(D_UP, sectionsCount, angle, L""));
 				}
 			}
 			break;
@@ -181,8 +196,10 @@ bool LevelSceneNode::loadLevelFromXML(const irr::io::path& filePath)
 			{
 				if (currentNode.equals_ignore_case(L"straight"))
 				{
-					m_obstacleString = xml->getNodeData();
-					addStraightNode(sectionsCount, m_obstacleString.trim());
+					obstacleString = xml->getNodeData();
+					obstacleString = obstacleString.trim();
+					addStraightNode(sectionsCount, obstacleString);
+					m_nodeBlocks.push_back(NodeBlock(D_FORWARD, sectionsCount, angle, obstacleString));
 				}
 			}
 			break;
@@ -192,6 +209,12 @@ bool LevelSceneNode::loadLevelFromXML(const irr::io::path& filePath)
 		}
 	}
 	xml->drop();
+
+//assign wideCurrnetObstacleBox
+//	if (!m_obstacles.empty())
+//	{
+//		m_wideCurrentObstacleBox = dynamic_cast<ISceneNode*>(m_obstacles[m_currentObstacleIndex])->getBoundingBox();
+//	}
 
 //vehicle
 	if (!addVehicleTo(m_sceneManager->getRootSceneNode()))
@@ -235,12 +258,21 @@ void LevelSceneNode::update()
 
 //nav points
 		irr::core::vector3df vehiclePosition = m_vehicle->m_sceneNode->getPosition();
-		irr::core::vector3df leftToNavPointVector = m_normalizedDistanceVector * (m_distanceFullBNP - m_distancePassedBNP);
+		//irr::core::vector3df leftToNavPointVector = m_normalizedDistanceVector * (m_distanceFullBNP - m_distancePassedBNP);
+		irr::core::vector3df leftToNavPointVector = m_normalizedDistanceVector * (m_distanceFullBNP + 2.0f * m_distanceBNPInputDelta - m_distancePassedBNP);
 		m_distancePassedBNP += m_vehicle->m_speedScalar * deltaTimeInSeconds;
-		if (m_distancePassedBNP > m_distanceFullBNP)
+
+
+		//if (m_distancePassedBNP > m_distanceFullBNP)
+		if (m_distancePassedBNP > m_distanceFullBNP + 2.0f * m_distanceBNPInputDelta)
 		{
-			m_distancePassedBNP = m_distancePassedBNP - m_distanceFullBNP;
+			//m_distancePassedBNP = m_distancePassedBNP - m_distanceFullBNP;
+			m_distancePassedBNP = m_distancePassedBNP - m_distanceFullBNP - 2.0f * m_distanceBNPInputDelta;
 			m_currentNavigationPointIndex++;
+
+//node blocks
+			updateNodeBlocksIndex();
+
 			if (m_currentNavigationPointIndex >= m_navigationPoints.size())
 			{
 				m_finished = true;
@@ -282,6 +314,9 @@ void LevelSceneNode::update()
 
 //animate camera target
 		animateCameraTarget();
+
+//check for obstacle collisions
+		checkForObstacleCollisions();
 
 		//m_vehicle->update(deltaTimeInSeconds);
 	}
@@ -434,7 +469,7 @@ bool LevelSceneNode::addCurveNode(irr::u32 sectionsCount, irr::f32 angle, DIRECT
 
 bool LevelSceneNode::addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sectionNumber, OBSTACLE_TYPE obstacleType, OBSTACLE_POSITION obstaclePosition)
 {
-	irr::scene::ISceneNode* obstacleNode;
+	//IObstacle* obstacleNode;
 	irr::core::vector3df halfSize;
 	irr::core::vector3df position;
 	irr::core::vector3df rotation;
@@ -488,7 +523,7 @@ bool LevelSceneNode::addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sect
 			break;
 		}
 
-		obstacleNode = new WallSceneNode(parent,
+		auto obstacleNode = new WallSceneNode(parent,
 										m_sceneManager,
 										-1,
 										m_driver->getTexture(TEXTURE_PATH + WALL_TEXTURE_NAME_DEFAULT),
@@ -496,6 +531,10 @@ bool LevelSceneNode::addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sect
 										position,
 										rotation);
 		obstacleNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
+
+//insert obstacle pointer to m_obstacles array
+		m_obstacles.push_back(obstacleNode);
+
 		obstacleNode->drop();
 	}
 	else if (obstacleType == OT_MINE)
@@ -535,6 +574,7 @@ void LevelSceneNode::processInput(irr::f32 deltaTimeInSeconds)
 		inputVector += irr::core::vector3df(-KEY_REACTION_SPEED_DEFAULT * deltaTimeInSeconds, 0.0f, 0.0f);
 
 	m_inputPositionDelta += inputVector * VEHICLE_SCALE;
+//check wall collisions
 	checkForWallCollisions();
 
 	irr::core::matrix4 translationMatrix;
@@ -542,11 +582,31 @@ void LevelSceneNode::processInput(irr::f32 deltaTimeInSeconds)
 	translationMatrix = m_vehicle->m_sceneNode->getAbsoluteTransformation() * translationMatrix;
 	inputVector = translationMatrix.getTranslation();
 	m_vehicle->m_sceneNode->setPosition(inputVector);
+
+//recalculate distanceBNP delta
+	irr::f32 angle = irr::core::PI * m_nodeBlocks[m_currentNodeBlockIndex].m_angle / (360.0f * (float)(m_nodeBlocks[m_currentNodeBlockIndex].m_sectionCount));
+	switch(m_nodeBlocks[m_currentNodeBlockIndex].m_direction)
+	{
+	case D_LEFT:
+		m_distanceBNPInputDelta = -m_inputPositionDelta.X * sinf(angle);
+		break;
+	case D_RIGHT:
+		m_distanceBNPInputDelta = m_inputPositionDelta.X * sinf(angle);
+		break;
+	case D_DOWN:
+		m_distanceBNPInputDelta = m_inputPositionDelta.Y * sinf(angle);
+		break;
+	case D_UP:
+		m_distanceBNPInputDelta = -m_inputPositionDelta.Y * sinf(angle);
+		break;
+	default:
+		m_distanceBNPInputDelta = 0.0f;
+		break;
+	}
 }
 
 void LevelSceneNode::resetLevel()
 {
-	m_currentSection = 0;
 	m_currentFacePosition = irr::core::vector3df(0.0f, 0.0f, 0.0f);
 	m_currentFaceRotation = irr::core::vector3df(0.0f, 0.0f, 0.0f);
 	m_lastTime = 0;
@@ -560,6 +620,7 @@ void LevelSceneNode::resetLevel()
 	m_currentNavigationPointIndex = 0;
 	m_distanceFullBNP = 0.0f;
 	m_distancePassedBNP = 0.0f;
+	m_distanceBNPInputDelta = 0.0f;
 
 	setAutomaticCulling(irr::scene::EAC_OFF);
 	m_box.MaxEdge.set(0,0,0);
@@ -567,13 +628,19 @@ void LevelSceneNode::resetLevel()
 
 //camera target animation
 	m_animatingCameraTarget = false;
-//	m_cameraTargetAnimationCount = 0;
-//	m_cameraTargetAnimationStep = 0;
 	m_cameraTargetAnimationDelta = irr::core::vector3df(0.0f, 0.0f, 0.0f);
 	m_cameraTargetAnimationEnd = irr::core::vector3df(0.0f, 0.0f, 0.0f);
 
+//node blocks
+	m_currentNodeBlockIndex = 0;
+	m_currentSectionIndex = 0;
+
 //input
 	m_inputPositionDelta = irr::core::vector3df(0.0f, 0.0f, 0.0f);
+
+//obstacles
+	m_currentObstacleIndex = 0;				
+	m_wasNearCurrentObstacle = false;
 }
 
 void LevelSceneNode::checkForWallCollisions()
@@ -586,16 +653,16 @@ void LevelSceneNode::checkForWallCollisions()
 //center bounding box at (0.0f, 0.0f, 0.0f)
 	irr::core::vector3df edgeDiff = (vehicleBoundingBox.MaxEdge - vehicleBoundingBox.MinEdge) / 2.0f;
 
-	if (-edgeDiff.X + m_inputPositionDelta.X <= -roomHalfSize.X)
+	if (-edgeDiff.X + m_inputPositionDelta.X <= -roomHalfSize.X + WALL_SIDE_MARGIN)
 		m_scratchedWallLR = D_RIGHT;
-	else if (edgeDiff.X + m_inputPositionDelta.X >= roomHalfSize.X)
+	else if (edgeDiff.X + m_inputPositionDelta.X >= roomHalfSize.X - WALL_SIDE_MARGIN)
 		m_scratchedWallLR = D_LEFT;
 	else
 		m_scratchedWallLR = D_NONE;
 
-	if (-edgeDiff.Y + m_inputPositionDelta.Y <= -roomHalfSize.Y)
+	if (-edgeDiff.Y + m_inputPositionDelta.Y <= -roomHalfSize.Y + WALL_BOTTOM_MARGIN)
 		m_scratchedWallDU = D_DOWN;
-	else if (-edgeDiff.Y + m_inputPositionDelta.Y >= roomHalfSize.Y)
+	else if (-edgeDiff.Y + m_inputPositionDelta.Y >= roomHalfSize.Y - WALL_TOP_MARGIN)
 		m_scratchedWallDU = D_UP;
 	else
 		m_scratchedWallDU = D_NONE;
@@ -620,9 +687,11 @@ void LevelSceneNode::animateCameraTarget()
 {
 	if (m_animatingCameraTarget)
 	{
-		if (m_distancePassedBNP < m_distanceFullBNP)
+		//if (m_distancePassedBNP < m_distanceFullBNP)
+		if (m_distancePassedBNP < m_distanceFullBNP + 2.0f * m_distanceBNPInputDelta)
 		{
-			irr::core::vector3df newCameraTarget = m_cameraTargetAnimationStart + (m_cameraTargetAnimationDelta * (m_distancePassedBNP / m_distanceFullBNP));
+			//irr::core::vector3df newCameraTarget = m_cameraTargetAnimationStart + (m_cameraTargetAnimationDelta * (m_distancePassedBNP / m_distanceFullBNP));
+			irr::core::vector3df newCameraTarget = m_cameraTargetAnimationStart + (m_cameraTargetAnimationDelta * (m_distancePassedBNP / (m_distanceFullBNP + 2.0f * m_distanceBNPInputDelta)));
 
 //animate vehicle rotation
 			irr::core::matrix4 rotationMatrix;
@@ -640,4 +709,46 @@ void LevelSceneNode::animateCameraTarget()
 			m_cameraNode->setTarget(m_cameraTargetAnimationEnd);
 		}
 	}
+}
+
+void LevelSceneNode::updateNodeBlocksIndex()
+{
+	m_currentSectionIndex++;
+	if (m_currentSectionIndex >= m_nodeBlocks[m_currentNodeBlockIndex].m_sectionCount)
+	{
+		m_currentNodeBlockIndex++;
+		m_currentSectionIndex = 0;
+	}
+}
+
+void LevelSceneNode::checkForObstacleCollisions()
+{
+	IObstacle* currentObstacle = m_obstacles[m_currentObstacleIndex];
+	ISceneNode* node = m_vehicle->m_sceneNode;
+	if (currentObstacle->intersectsWithObject(node))
+	{
+		//m_device->drop();
+		printf("Collision! ");
+		return;
+	}
+
+	if (m_wasNearCurrentObstacle)
+	{
+		if (!currentObstacle->isNearObject(node))
+		{
+			printf("\nPassed obstacle!\n");
+			m_wasNearCurrentObstacle = false;
+			if (m_currentObstacleIndex + 1 < m_obstacles.size())
+				m_currentObstacleIndex++;
+		}
+	}
+	else
+	{
+		if (currentObstacle->isNearObject(node))
+		{
+			m_wasNearCurrentObstacle = true;
+			printf("\nNear obstacle!\n");
+		}
+	}
+
 }
