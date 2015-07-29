@@ -50,18 +50,23 @@ LevelSceneNode::LevelSceneNode(GameManager* gameManager,
 	setAutomaticCulling(irr::scene::EAC_OFF);
 	m_box.MaxEdge.set(0,0,0);
 	m_box.MinEdge.set(0,0,0);
-
 //node blocks
 	m_currentNodeBlockIndex = 0;
 	m_currentSectionIndex = 0;
-
 //input
 	m_inputPositionDelta = irr::core::vector3df(0.0f, 0.0f, 0.0f);
+//explosion node
+	m_explosionNode = nullptr;
+	m_explosionAnimator = nullptr;
+//sparks node
+	m_sparksNode = nullptr;
 }
 
 LevelSceneNode::~LevelSceneNode()
 {
 	delete m_vehicle;
+	//if (m_explosionNode)
+	//	m_explosionNode->drop();
 }
 
 bool LevelSceneNode::addVehicleTo(irr::scene::ISceneNode* parent)
@@ -70,10 +75,8 @@ bool LevelSceneNode::addVehicleTo(irr::scene::ISceneNode* parent)
 	if (!m_vehicle->initVehicle(parent, m_sceneManager, MODEL_PATH + VEHICLE_MODEL_NAME_DEFAULT))
 		return false;
 
-	//m_vehicle->m_sceneNode->setVisible(false);
-
 //add spot light to vehicle
-	irr::scene::ILightSceneNode* m_lightNode = m_sceneManager->addLightSceneNode(m_vehicle->m_sceneNode,
+	m_lightNode = m_sceneManager->addLightSceneNode(m_vehicle->m_sceneNode,
 																				LIGHT_POSITION,
 																				LIGHT_COLOR, 
 																				LIGHT_RADIUS);
@@ -210,11 +213,23 @@ bool LevelSceneNode::loadLevelFromXML(const irr::io::path& filePath)
 	}
 	xml->drop();
 
-//assign wideCurrnetObstacleBox
-//	if (!m_obstacles.empty())
-//	{
-//		m_wideCurrentObstacleBox = dynamic_cast<ISceneNode*>(m_obstacles[m_currentObstacleIndex])->getBoundingBox();
-//	}
+//render optimization init children iterators
+	if (!Children.empty())
+	{
+		m_previousRoomNode = Children.begin();
+		if(Children.getSize() > 2)
+		{
+			m_nextRoomNode = Children.begin();
+			m_nextRoomNode += 2;
+			irr::scene::ISceneNodeList::Iterator it = m_nextRoomNode;
+			for (; it != Children.end(); it++)
+				(*it)->setVisible(false);  //only 2 room nodes are visible at a time
+		}
+		else
+		{
+			m_nextRoomNode = Children.end();
+		}
+	}
 
 //vehicle
 	if (!addVehicleTo(m_sceneManager->getRootSceneNode()))
@@ -223,6 +238,9 @@ bool LevelSceneNode::loadLevelFromXML(const irr::io::path& filePath)
 //camera
 	if(!addCameraTo(m_vehicle->m_sceneNode))
 		return false;
+
+//explosion
+	addExplosionNodeWithTextureSheet(TEXTURE_PATH + EXPLOSION_TEXTURE_NAME_DEFAULT);
 
 	return true;
 }
@@ -641,6 +659,28 @@ void LevelSceneNode::resetLevel()
 //obstacles
 	m_currentObstacleIndex = 0;				
 	m_wasNearCurrentObstacle = false;
+
+//explosion
+	if(m_explosionNode)
+		m_explosionNode->setVisible(false);
+
+//render optimization init children iterators
+	if (!Children.empty())
+	{
+		m_previousRoomNode = Children.begin();
+		if(Children.getSize() > 2)
+		{
+			m_nextRoomNode = Children.begin();
+			m_nextRoomNode += 2;
+			irr::scene::ISceneNodeList::Iterator it = m_nextRoomNode;
+			for (; it != Children.end(); it++)
+				(*it)->setVisible(false);  //only 2 room nodes are visible at a time
+		}
+		else
+		{
+			m_nextRoomNode = Children.end();
+		}
+	}
 }
 
 void LevelSceneNode::checkForWallCollisions()
@@ -718,6 +758,8 @@ void LevelSceneNode::updateNodeBlocksIndex()
 	{
 		m_currentNodeBlockIndex++;
 		m_currentSectionIndex = 0;
+
+		recalculateVisibilityForNodes();
 	}
 }
 
@@ -727,7 +769,33 @@ void LevelSceneNode::checkForObstacleCollisions()
 	ISceneNode* node = m_vehicle->m_sceneNode;
 	if (currentObstacle->intersectsWithObject(node))
 	{
-		//m_device->drop();
+	/*	CSceneNodeAnimatorTextureSheet* animator = new CSceneNodeAnimatorTextureSheet(EXPLOSION_TEXTURE_WIDTH_FRAMES,
+																					  EXPLOSION_TEXTURE_HEIGHT_FRAMES, 
+																					  EXPLOSION_TIME_PER_FRAME,
+																					  m_device->getTimer()->getTime(),
+																					  false);
+		m_explosionNode->addAnimator(animator);
+		animator->drop();*/
+
+		m_explosionNode->setPosition(node->getAbsolutePosition());
+		m_cameraNode->setPosition(m_cameraNode->getAbsolutePosition());
+		m_cameraNode->setParent(m_sceneManager->getRootSceneNode());
+		irr::core::vector3df position = m_lightNode->getAbsolutePosition();
+		//irr::core::vector3df rotation = m_lightNode->getRotation();
+		
+		irr::core::matrix4 rotationMatrix;
+		rotationMatrix.setRotationDegrees(irr::core::vector3df(0.0f, 180.0f, 0.0f));
+		rotationMatrix = rotationMatrix * node->getAbsoluteTransformation();
+		m_lightNode->setRotation(rotationMatrix.getRotationDegrees());
+		m_lightNode->setParent(m_sceneManager->getRootSceneNode());
+		m_lightNode->setPosition(position);
+		//m_lightNode->setRotation(irr::core::vector3df(0.0f, 0.0f, 0.0f));
+		node->setVisible(false);
+
+		m_explosionAnimator->reset(m_device->getTimer()->getTime());
+		m_explosionNode->setVisible(true);
+
+		m_gameManager->setGameState(GS_GAME_OVER);
 		printf("Collision! ");
 		return;
 	}
@@ -751,4 +819,51 @@ void LevelSceneNode::checkForObstacleCollisions()
 		}
 	}
 
+}
+
+void LevelSceneNode::recalculateVisibilityForNodes()
+{
+	if (m_previousRoomNode != Children.end())
+	{
+		(*m_previousRoomNode)->setVisible(false);
+		m_previousRoomNode++;
+	}
+
+	if (m_nextRoomNode != Children.end())
+	{
+		(*m_nextRoomNode)->setVisible(true);
+		m_nextRoomNode++;
+	}
+}
+
+bool LevelSceneNode::addExplosionNodeWithTextureSheet(const irr::io::path& texturePath)
+{
+	m_explosionNode = m_sceneManager->addBillboardSceneNode(this, EXPLOSION_TEXTURE_DIMENSION);
+	irr::video::ITexture* texture = m_driver->getTexture(texturePath);
+	if(!texture)
+		return false;
+
+	m_explosionNode->setMaterialTexture(0, texture);
+	m_explosionNode->getMaterial(0).getTextureMatrix(0).setTextureScale(1.0f / EXPLOSION_TEXTURE_WIDTH_FRAMES, 1.0f / EXPLOSION_TEXTURE_HEIGHT_FRAMES);
+	m_explosionNode->setPosition(irr::core::vector3df(0.0f, 0.0f, 0.0f));
+	m_explosionNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+	m_explosionNode->setMaterialType(irr::video::EMT_TRANSPARENT_ALPHA_CHANNEL);
+	m_explosionNode->setMaterialFlag(irr::video::EMF_ZBUFFER, false);
+	m_explosionNode->setVisible(false);
+
+	m_explosionAnimator = new CSceneNodeAnimatorTextureSheet(EXPLOSION_TEXTURE_WIDTH_FRAMES,
+															 EXPLOSION_TEXTURE_HEIGHT_FRAMES, 
+															 EXPLOSION_TIME_PER_FRAME,
+															 m_device->getTimer()->getTime(),
+															 false);
+	m_explosionNode->addAnimator(m_explosionAnimator);
+	m_explosionAnimator->drop();
+
+	return true;
+}
+
+bool LevelSceneNode::addSparksParticleNodeWithTexture(const irr::io::path& texturePath)
+{
+
+	return true;
 }

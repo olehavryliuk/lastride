@@ -5,6 +5,7 @@
 #include <irrlicht.h>
 #include "CurveRoomSceneNode.h"
 #include "Vehicle.h"
+#include "CSceneNodeAnimatorTextureSheet.h"
 
 class GameManager;
 /*
@@ -69,6 +70,13 @@ protected:
 	irr::scene::ILightSceneNode* m_lightNode;	//weak ref
 	irr::u32 m_lastTime;
 
+//explosion node
+	irr::scene::IBillboardSceneNode* m_explosionNode;
+	CSceneNodeAnimatorTextureSheet* m_explosionAnimator;
+
+//sparks node
+	irr::scene::IParticleSystemSceneNode* m_sparksNode;
+
 //game logic flags
 	bool m_finished;
 	bool m_isScratchingWalls;
@@ -99,18 +107,23 @@ protected:
 	irr::u32 m_currentNodeBlockIndex;
 	irr::u32 m_currentSectionIndex;
 
-	void updateNodeBlocksIndex();
+//render optimization
+	irr::scene::ISceneNodeList::Iterator m_previousRoomNode;
+	irr::scene::ISceneNodeList::Iterator m_nextRoomNode;
 
+//protected methods
 	bool addVehicleTo(irr::scene::ISceneNode* parent);
 	bool addStraightNode(irr::u32 sectionsCount, irr::core::stringw initString);
 	bool addCurveNode(irr::u32 sectionsCount, irr::f32 angle, DIRECTION direction, irr::core::stringw initString = "");
 	bool addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sectionNumber, OBSTACLE_TYPE obstacleType, OBSTACLE_POSITION obstaclePosition);
 	bool addCameraTo(irr::scene::ISceneNode* parent);
+	bool addExplosionNodeWithTextureSheet(const irr::io::path& texturePath);
+	bool addSparksParticleNodeWithTexture(const irr::io::path& texturePath);
 	void resetLevel();
-	
+	void updateNodeBlocksIndex();
 	void checkForWallCollisions();
-
 	void checkForObstacleCollisions();
+	void recalculateVisibilityForNodes();
 
 //camera target animation
 	void startCameraTargetAnimation(irr::core::vector3df startPosition, irr::core::vector3df endPosition);

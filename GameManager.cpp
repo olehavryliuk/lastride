@@ -64,6 +64,16 @@ GameManager::~GameManager()
 	m_device->drop();
 }
 
+GAME_STATE GameManager::getGameState()
+{
+	return m_gameState;
+}
+
+void GameManager::setGameState(GAME_STATE gameState)
+{
+	m_gameState = gameState;
+}
+
 irr::IrrlichtDevice* GameManager::getDevice()
 {
 	return m_device;
@@ -119,16 +129,20 @@ void GameManager::update()
 
 void GameManager::run()
 {
-	m_driver->beginScene(true, true, irr::video::SColor(255,100,100,140));
+	m_driver->beginScene(true, true, irr::video::SColor(255, 0, 0, 0));
 	
 	if (m_gameState == GS_PLAYING)
 	{
 		update();
-		m_sceneManager->drawAll();
+	}
+
+	if (m_gameState == GS_MAIN_MENU || m_gameState == GS_OPTIONS_MENU)
+	{
+		m_GUIEnviroment->drawAll();
 	}
 	else
 	{
-		m_GUIEnviroment->drawAll();
+		m_sceneManager->drawAll();
 	}
 
 	m_driver->endScene();

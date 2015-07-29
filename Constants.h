@@ -6,6 +6,7 @@
 #include <irrString.h>
 #include <EDriverTypes.h>
 #include <vector3d.h>
+#include <dimension2d.h>
 #include <SColor.h>
 
 //screen resolution
@@ -36,6 +37,7 @@ extern const irr::core::stringw DEFAULT_FONT;
 extern const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT;
 extern const irr::core::stringw WALL_TEXTURE_NAME_DEFAULT;
 extern const irr::core::stringw VEHICLE_MODEL_NAME_DEFAULT;
+extern const irr::core::stringw EXPLOSION_TEXTURE_NAME_DEFAULT;
 
 //Debug
 extern const bool SHOW_FPS;
@@ -58,6 +60,12 @@ extern const irr::f32 CAMERA_TARGET_DISTANCE;
 extern const irr::core::vector3df LIGHT_POSITION;
 extern const irr::video::SColorf LIGHT_COLOR;
 extern const irr::f32 LIGHT_RADIUS;
+
+//Explosion
+extern const irr::core::dimension2df EXPLOSION_TEXTURE_DIMENSION;
+extern const irr::u32 EXPLOSION_TEXTURE_WIDTH_FRAMES;
+extern const irr::u32 EXPLOSION_TEXTURE_HEIGHT_FRAMES;
+extern const irr::u32 EXPLOSION_TIME_PER_FRAME;
 
 //CurveRoomSceneNode
 #define MAX_CURVE_SECTIONS 10

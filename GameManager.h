@@ -12,7 +12,9 @@ enum GAME_STATE
 	GS_INTRO		= 0,
 	GS_MAIN_MENU	= 1,
 	GS_OPTIONS_MENU = 2,
-	GS_PLAYING		= 3
+	GS_PLAYING		= 3,
+	GS_PAUSED		= 4,
+	GS_GAME_OVER	= 5
 };
 
 class GameManager
@@ -34,6 +36,9 @@ private:
 public:
 	GameManager();
 	~GameManager();
+
+	GAME_STATE getGameState();
+	void setGameState(GAME_STATE gameState);
 
 	bool initialize();
 	bool loadTestLevel();
