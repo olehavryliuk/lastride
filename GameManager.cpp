@@ -16,15 +16,7 @@ GameManager::GameManager()
 bool GameManager::initialize()
 {
 	m_eventReceiver = new GameEventReceiver();
-/*
-	m_device = irr::createDevice(VIDEO_DRIVER_TYPE,
-								 irr::core::dimension2d<irr::u32>(SCREEN_WIDTH_DEFAULT, SCREEN_HEIGHT_DEFAULT),
-								 COLOR_BITS,
-								 IS_FULLSCREEN,
-								 HAS_STENCILBUFFER,
-								 IS_VSYNC,
-								 m_eventReceiver);
-*/
+
     irr::SIrrlichtCreationParameters p;
 	p.DriverType = VIDEO_DRIVER_TYPE;
 	p.WindowSize = irr::core::dimension2d<irr::u32>(SCREEN_WIDTH_DEFAULT, SCREEN_HEIGHT_DEFAULT);
@@ -43,6 +35,9 @@ bool GameManager::initialize()
 	m_driver = m_device->getVideoDriver();
 	m_sceneManager = m_device->getSceneManager();
 	m_GUIEnviroment = m_device->getGUIEnvironment();
+
+//mip map texture creation flag
+	m_driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, CREATE_MIP_MAPS);
 
 //add menus
 	m_mainMenu = new MainMenu(this);
@@ -81,19 +76,17 @@ irr::IrrlichtDevice* GameManager::getDevice()
 
 bool GameManager::loadTestLevel()
 {
-	if (!m_levelSceneNode)
-		m_levelSceneNode = new LevelSceneNode(this ,m_device, m_sceneManager->getRootSceneNode(), m_sceneManager);
+	m_levelSceneNode = new LevelSceneNode(this ,m_device, m_sceneManager->getRootSceneNode(), m_sceneManager);
 	if (!m_levelSceneNode)
 		return false;
 
-	//addFPSCamera();
 	m_levelSceneNode->loadTestLevel();
 
 	m_gameState = GS_PLAYING;
 
 	m_device->getCursorControl()->setVisible(false);
 
-	//m_levelSceneNode->drop();
+	m_levelSceneNode->drop();
 
 	return true;
 }
@@ -103,8 +96,6 @@ bool GameManager::loadLevelFromXML(const irr::io::path& filePath)
 	m_levelSceneNode = new LevelSceneNode(this, m_device, m_sceneManager->getRootSceneNode(), m_sceneManager);
 	if (!m_levelSceneNode)
 		return false;
-
-	//addFPSCamera();
 
 	m_levelSceneNode->loadLevelFromXML(filePath);
 
@@ -129,7 +120,7 @@ void GameManager::update()
 
 void GameManager::run()
 {
-	m_driver->beginScene(true, true, irr::video::SColor(255, 0, 0, 0));
+	m_driver->beginScene(true, true, irr::video::SColor(255, 50, 100, 100));
 	
 	if (m_gameState == GS_PLAYING)
 	{

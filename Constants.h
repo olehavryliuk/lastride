@@ -35,6 +35,7 @@ extern const irr::core::stringw DEFAULT_FONT;
 
 //Resources names
 extern const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT;
+extern const irr::core::stringw ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT;
 extern const irr::core::stringw WALL_TEXTURE_NAME_DEFAULT;
 extern const irr::core::stringw VEHICLE_MODEL_NAME_DEFAULT;
 extern const irr::core::stringw EXPLOSION_TEXTURE_NAME_DEFAULT;
@@ -60,6 +61,16 @@ extern const irr::f32 CAMERA_TARGET_DISTANCE;
 extern const irr::core::vector3df LIGHT_POSITION;
 extern const irr::video::SColorf LIGHT_COLOR;
 extern const irr::f32 LIGHT_RADIUS;
+extern const irr::f32 LIGHT_CONE_ANGLE;
+
+//Shader, Bump Mapping, Parallax Mapping
+extern const bool CREATE_MIP_MAPS;
+extern const bool USE_OWN_SHADER_LIGHTING;
+extern const bool USE_BUMP_MAPPING;
+extern const bool USE_PARALLAX_MAPPING;
+extern const bool USE_HEIGHT_MAP_TEXTURE;
+extern const irr::f32 NORMAL_MAP_HEIGHT_TEXTURE_FACTOR;
+extern const irr::f32 ADJUST_HEIGHT_FOR_PARALLAX;
 
 //Explosion
 extern const irr::core::dimension2df EXPLOSION_TEXTURE_DIMENSION;

@@ -14,6 +14,7 @@ CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent,
 	setAutomaticCulling(irr::scene::EAC_OFF);
 
 	// create m_material
+	//m_material.MaterialType = irr::video::EMT_SOLID;
 	m_material.Lighting = true;
 	m_material.setTexture(0, texture);
 	m_material.AntiAliasing=0;

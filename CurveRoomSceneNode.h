@@ -22,7 +22,8 @@ class CurveRoomSceneNode : public irr::scene::ISceneNode
 protected:
 	irr::core::aabbox3d<irr::f32> m_box;
 	irr::u16 m_indices[MAX_CURVE_SECTIONS*24];
-	irr::video::S3DVertex m_vertices[(MAX_CURVE_SECTIONS+1)*4];
+	//irr::video::S3DVertex m_vertices[(MAX_CURVE_SECTIONS+1)*4];
+	irr::video::S3DVertexTangents m_vertices[(MAX_CURVE_SECTIONS+1)*4];
 	irr::u16 m_verticesCount;
 	DIRECTION m_direction;
 	irr::f32 m_angle;
@@ -39,7 +40,8 @@ public:
 						irr::f32 radius,
 						irr::u8 sectionCount,
 						irr::s32 id,
-						irr::video::ITexture* texture,
+						irr::video::ITexture* diffuseTexture,
+						irr::video::ITexture* normalMapTexture = nullptr,
 						const irr::core::vector3df& halfSize = ROOM_PROPORTIONS,
 						const irr::core::vector3df& position = irr::core::vector3df(0.0f,0.0f,0.0f),
 						const irr::core::vector3df& rotation = irr::core::vector3df(0.0f,0.0f,0.0f),
@@ -50,7 +52,7 @@ public:
 	virtual irr::u32 getMaterialCount() const;
 	virtual irr::video::SMaterial& getMaterial(irr::u32 i);
 	virtual irr::u32 getVertexCount() const;
-	virtual const irr::video::S3DVertex* getVertices() const;
+	virtual const irr::video::S3DVertexTangents* getVertices() const;
 };
 
 #endif

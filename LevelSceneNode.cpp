@@ -115,7 +115,7 @@ bool LevelSceneNode::loadTestLevel()
 {
 	if (!m_sceneManager)
 		return false;
-
+/*
 	//add vehicle
 	irr::scene::IMesh* mesh = m_sceneManager->getMesh(MODEL_PATH + "Vehicle\\Feisar_Ship.3DS");
     if (!mesh)
@@ -128,15 +128,47 @@ bool LevelSceneNode::loadTestLevel()
 	node->setScale(irr::core::vector3df(0.05f, 0.05f, 0.05f));
 	node->setParent(m_sceneManager->getActiveCamera());
 	node->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
+	*/
+
+	irr::video::ITexture* normalMapTexture = nullptr;
+	if (USE_BUMP_MAPPING || USE_PARALLAX_MAPPING)
+	{
+		normalMapTexture = m_driver->getTexture(TEXTURE_PATH + ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT);
+		if (normalMapTexture && USE_HEIGHT_MAP_TEXTURE)
+			m_driver->makeNormalMapTexture(normalMapTexture, NORMAL_MAP_HEIGHT_TEXTURE_FACTOR); 
+	}
 	
+	addStraightNode(10, L"0000000000");
+	addCurveNode(10, 90.0f, D_UP, L"");
+	addCurveNode(10, 90.0f, D_DOWN, L"");
+	addCurveNode(10, 90.0f, D_RIGHT, L"");
+	addCurveNode(10, 90.0f, D_LEFT, L"");
+	addStraightNode(10, L"00TBLRbtrl");
+
 	irr::scene::ILightSceneNode* lightNode = m_sceneManager->addLightSceneNode(0,
-																				irr::core::vector3df(0.0f , 0.0f, -50.0f),
-																				irr::video::SColorf(1.0f, 1.0f, 1.0f, 1.0f), 
-																				700.0f);
-	irr::video::SLight& light = lightNode->getLightData();
-	light.Type = irr::video::ELT_SPOT;
-	light.OuterCone = 40.0f;
-	lightNode->setParent(m_sceneManager->getActiveCamera());
+																				irr::core::vector3df(0.0f , 0.0f, 0.0f),
+																				LIGHT_COLOR, 
+																				LIGHT_RADIUS);
+	irr::scene::ISceneNodeAnimator* anim =
+	m_sceneManager->createFlyCircleAnimator (irr::core::vector3df(0.0f, 0.0f, 100.0f), 50.0f, 0.001f, irr::core::vector3df(1.0f, 1.0f, 0.0f));
+	lightNode->addAnimator(anim);
+	anim->drop();
+
+// attach billboard to the light
+	irr::scene::IBillboardSceneNode* bill =
+		m_sceneManager->addBillboardSceneNode(lightNode, irr::core::dimension2d<irr::f32>(60, 60));
+
+	bill->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+	bill->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, false);
+	bill->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
+	bill->setMaterialTexture(0, m_driver->getTexture(TEXTURE_PATH + "particlewhite.bmp"));
+
+	m_sceneManager->addCameraSceneNodeFPS();
+
+	//irr::video::SLight& light = lightNode->getLightData();
+	//light.Type = irr::video::ELT_SPOT;
+	//light.OuterCone = LIGHT_CONE_ANGLE;
+	//lightNode->setParent(m_sceneManager->getActiveCamera());
 
 	return true;									
 }
@@ -146,6 +178,16 @@ bool LevelSceneNode::loadLevelFromXML(const irr::io::path& filePath)
 	irr::io::IXMLReader* xml = m_device->getFileSystem()->createXMLReader(filePath);
 	if (!xml)
 		return false;
+
+//need refactoring
+	irr::video::ITexture* normalMapTexture = nullptr;
+	if (USE_BUMP_MAPPING || USE_PARALLAX_MAPPING)
+	{
+		normalMapTexture = m_driver->getTexture(TEXTURE_PATH + ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT);
+		if (normalMapTexture && USE_HEIGHT_MAP_TEXTURE)
+			m_driver->makeNormalMapTexture(normalMapTexture, NORMAL_MAP_HEIGHT_TEXTURE_FACTOR); 
+	}
+//
 
 	irr::core::stringw currentNode = L"";
 	irr::core::stringw attribute = L"";
@@ -342,12 +384,15 @@ void LevelSceneNode::update()
 
 bool LevelSceneNode::addStraightNode(irr::u32 sectionsCount, irr::core::stringw initString)
 {
-	if (!m_sceneManager)
-		return false;
+	irr::video::ITexture* normalMapTexture = nullptr;
+		if (USE_BUMP_MAPPING || USE_PARALLAX_MAPPING)
+			normalMapTexture = m_driver->getTexture(TEXTURE_PATH + ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT);
+
 	StraightRoomSceneNode* straightNode = new StraightRoomSceneNode(this,
 											m_sceneManager,
 											-1,
 											m_driver->getTexture(TEXTURE_PATH + ROOM_TEXTURE_NAME_DEFAULT),
+											normalMapTexture,
 											sectionsCount,
 											ROOM_PROPORTIONS,
 											m_currentFacePosition,
@@ -357,7 +402,7 @@ bool LevelSceneNode::addStraightNode(irr::u32 sectionsCount, irr::core::stringw 
 
 //add navigation points
 	const irr::u32 vertexCount = straightNode->getVertexCount();
-	const irr::video::S3DVertex* vertices = straightNode->getVertices();
+	const irr::video::S3DVertexTangents* vertices = straightNode->getVertices();
 	irr::core::matrix4 absoluteTransform = straightNode->getAbsoluteTransformation();
 	irr::core::vector3df navigationPoint;
 	for (irr::u32 i = 4; i < vertexCount; i+=4)
@@ -418,6 +463,10 @@ bool LevelSceneNode::addStraightNode(irr::u32 sectionsCount, irr::core::stringw 
 
 bool LevelSceneNode::addCurveNode(irr::u32 sectionsCount, irr::f32 angle, DIRECTION direction, irr::core::stringw initString)
 {
+	irr::video::ITexture* normalMapTexture = nullptr;
+		if (USE_BUMP_MAPPING || USE_PARALLAX_MAPPING)
+			normalMapTexture = m_driver->getTexture(TEXTURE_PATH + ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT);
+
 	CurveRoomSceneNode* curveNode = new CurveRoomSceneNode(this,
 										m_sceneManager,
 										direction,
@@ -426,6 +475,7 @@ bool LevelSceneNode::addCurveNode(irr::u32 sectionsCount, irr::f32 angle, DIRECT
 										sectionsCount,
 										-1,
 										m_driver->getTexture(TEXTURE_PATH + ROOM_TEXTURE_NAME_DEFAULT),
+										normalMapTexture,
 										ROOM_PROPORTIONS,
 										m_currentFacePosition,
 										m_currentFaceRotation,
@@ -434,7 +484,7 @@ bool LevelSceneNode::addCurveNode(irr::u32 sectionsCount, irr::f32 angle, DIRECT
 
 //add navigation points
 	const irr::u32 vertexCount = curveNode->getVertexCount();
-	const irr::video::S3DVertex* vertices = curveNode->getVertices();
+	const irr::video::S3DVertexTangents* vertices = curveNode->getVertices();
 	irr::core::matrix4 absoluteTransform = curveNode->getAbsoluteTransformation();
 	irr::core::vector3df navigationPoint;
 	for (irr::u32 i = 4; i < vertexCount; i+=4)

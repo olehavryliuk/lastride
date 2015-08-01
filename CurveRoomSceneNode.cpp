@@ -9,7 +9,8 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 										irr::f32 radius,
 										irr::u8 sectionCount,
 										irr::s32 id,
-										irr::video::ITexture* texture,
+										irr::video::ITexture* diffuseTexture,
+										irr::video::ITexture* normalMapTexture,
 										const irr::core::vector3df& halfSize,
 										const irr::core::vector3df& position,
 										const irr::core::vector3df& rotation,
@@ -37,13 +38,32 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 	m_box.MaxEdge.set(0,0,0);
 	m_box.MinEdge.set(0,0,0);
 
-	// create m_material
-	m_material.Lighting = true;
-	m_material.AntiAliasing = ANTIALIASING;
-	m_material.setTexture(0, texture);
+// create m_material
+	//lighting
+	if (!USE_OWN_SHADER_LIGHTING)
+		m_material.Lighting = true;
+	else
+		m_material.Lighting = false;
+
+	//bump mapping and parallax mapping
+	if (USE_BUMP_MAPPING)
+		m_material.MaterialType = irr::video::EMT_NORMAL_MAP_SOLID;
+	else if (USE_PARALLAX_MAPPING)
+	{
+		m_material.MaterialType = irr::video::EMT_PARALLAX_MAP_SOLID;
+		m_material.MaterialTypeParam = ADJUST_HEIGHT_FOR_PARALLAX;
+	}
+	else
+		m_material.MaterialType = irr::video::EMT_SOLID;
+
+//set Textures
+	m_material.setTexture(0, diffuseTexture);
+	if (normalMapTexture)
+		m_material.setTexture(1, normalMapTexture);
+
 	m_material.TextureLayer[0].TextureWrapU = irr::video::ETC_REPEAT;
 	m_material.TextureLayer[0].TextureWrapV = irr::video::ETC_REPEAT;
-
+	m_material.AntiAliasing = ANTIALIASING;
 
 	const irr::f32 hX = halfSize.X;
 	const irr::f32 hY = halfSize.Y;
@@ -84,22 +104,30 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 			z_0_3 = shortRadius * sinus;
 			z_1_2 =	wideRadius * sinus;
 
-			m_vertices[0+4*i] = irr::video::S3DVertex(x_0_3, -hY, z_0_3, 
+			m_vertices[0+4*i] = irr::video::S3DVertexTangents(x_0_3, -hY, z_0_3, 
 													  cosinus, 1.0f, sinus, 
 													  vertexColor,
-													  o, o + t * (float)i);
-			m_vertices[1+4*i] = irr::video::S3DVertex(x_1_2, -hY, z_1_2,
+													  o, o + t * (float)i,
+													  cosinus, -1.0f, sinus,
+													  sinus, 0.0f, -cosinus);
+			m_vertices[1+4*i] = irr::video::S3DVertexTangents(x_1_2, -hY, z_1_2,
 													  -cosinus, 1.0f, -sinus, 
 													  vertexColor,
-													  t, o + t * (float)i);
-			m_vertices[2+4*i] = irr::video::S3DVertex(x_1_2, hY, z_1_2, 
+													  t, o + t * (float)i,
+													  cosinus, 1.0f, -sinus,
+													  sinus, 0.0f, -cosinus);
+			m_vertices[2+4*i] = irr::video::S3DVertexTangents(x_1_2, hY, z_1_2, 
 													  -cosinus, -1.0f, -sinus, 
 													  vertexColor,
-													  2 * t, o + t * (float)i);
-			m_vertices[3+4*i] = irr::video::S3DVertex(x_0_3, hY, z_0_3, 
+													  2 * t, o + t * (float)i,
+													  -cosinus, 1.0f, -sinus,
+													  sinus, 0.0f, -cosinus);
+			m_vertices[3+4*i] = irr::video::S3DVertexTangents(x_0_3, hY, z_0_3, 
 													  cosinus, -1.0f, sinus, 
 													  vertexColor,
-													  t, o + t * (float)i);
+													  t, o + t * (float)i,
+													  -cosinus, -1.0f, sinus,
+													  sinus, 0.0f, -cosinus);
 		}
 	}
 	else if (m_direction == D_RIGHT)
@@ -115,22 +143,30 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 			z_0_3 = wideRadius * sinus;
 			z_1_2 =	shortRadius * sinus;
 
-			m_vertices[0+4*i] = irr::video::S3DVertex(x_0_3, -hY, z_0_3, 
+			m_vertices[0+4*i] = irr::video::S3DVertexTangents(x_0_3, -hY, z_0_3, 
 													  cosinus, 1.0f, -sinus, 
 													  vertexColor,
-													  o, o + t * (float)i);
-			m_vertices[1+4*i] = irr::video::S3DVertex(x_1_2, -hY, z_1_2,
+													  o, o + t * (float)i,
+													  cosinus, -1.0f, -sinus,
+													  -sinus, 0.0f, -cosinus);
+			m_vertices[1+4*i] = irr::video::S3DVertexTangents(x_1_2, -hY, z_1_2,
 													  -cosinus, 1.0f, sinus, 
 													  vertexColor,
-													  t, o + t * (float)i);
-			m_vertices[2+4*i] = irr::video::S3DVertex(x_1_2, hY, z_1_2, 
+													  t, o + t * (float)i,
+													  cosinus, 1.0f, sinus,
+													  -sinus, 0.0f, -cosinus);
+			m_vertices[2+4*i] = irr::video::S3DVertexTangents(x_1_2, hY, z_1_2, 
 													  -cosinus, -1.0f, sinus, 
 													  vertexColor,
-													  2 * t, o + t * (float)i);
-			m_vertices[3+4*i] = irr::video::S3DVertex(x_0_3, hY, z_0_3, 
+													  2 * t, o + t * (float)i,
+													  -cosinus, 1.0f, sinus,
+													  -sinus, 0.0f, -cosinus);
+			m_vertices[3+4*i] = irr::video::S3DVertexTangents(x_0_3, hY, z_0_3, 
 													  cosinus, -1.0f, -sinus, 
 													  vertexColor,
-													  t, o + t * (float)i);
+													  t, o + t * (float)i,
+													  -cosinus, -1.0f, -sinus,
+													  -sinus, 0.0f, -cosinus);		
 		}
 	}
 	else if (m_direction == D_DOWN)
@@ -149,22 +185,30 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 			z_1_2 = shortRadius * sinus;
 			z_3_4 = wideRadius * sinus;
 
-			m_vertices[0+4*i] = irr::video::S3DVertex(-hX, y_0_1, z_1_2, 
+			m_vertices[0+4*i] = irr::video::S3DVertexTangents(-hX, y_0_1, z_1_2, 
 													  1.0f, cosinus, sinus, 
 													  vertexColor,
-													  o, o + t * (float)i);
-			m_vertices[1+4*i] = irr::video::S3DVertex(hX, y_0_1, z_1_2, 
+													  o, o + t * (float)i,
+													  1.0f, -cosinus, -sinus,
+													  0.0f, sinus, -cosinus);
+			m_vertices[1+4*i] = irr::video::S3DVertexTangents(hX, y_0_1, z_1_2, 
 													  -1.0f, cosinus, sinus, 
 													  vertexColor,
-													  t, o + t * (float)i);
-			m_vertices[2+4*i] = irr::video::S3DVertex(hX, y_2_3, z_3_4, 
+													  t, o + t * (float)i,
+													  1.0f, cosinus, sinus,
+													  0.0f, sinus, -cosinus);
+			m_vertices[2+4*i] = irr::video::S3DVertexTangents(hX, y_2_3, z_3_4, 
 													  -1.0f, -cosinus, -sinus,
 													  vertexColor,
-													  2 * t, o + t * (float)i);
-			m_vertices[3+4*i] = irr::video::S3DVertex(-hX, y_2_3, z_3_4, 
+													  2 * t, o + t * (float)i,
+													  -1.0f, cosinus, sinus,
+													  0.0f, sinus, -cosinus);
+			m_vertices[3+4*i] = irr::video::S3DVertexTangents(-hX, y_2_3, z_3_4, 
 													  1.0f, -cosinus, -sinus,
 													  vertexColor,
-													  t, o + t * (float)i);
+													  t, o + t * (float)i,
+													  -1.0f, -cosinus, -sinus,
+													  0.0f, sinus, -cosinus);
 		}
 	}
 	else if(m_direction == D_UP)
@@ -183,22 +227,30 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 			z_1_2 = wideRadius * sinus;
 			z_3_4 = shortRadius * sinus;
 
-			m_vertices[0+4*i] = irr::video::S3DVertex(-hX, y_0_1, z_1_2, 
+			m_vertices[0+4*i] = irr::video::S3DVertexTangents(-hX, y_0_1, z_1_2, 
 													  1.0f, cosinus, -sinus, 
 													  vertexColor,
-													  o, o + t * (float)i);
-			m_vertices[1+4*i] = irr::video::S3DVertex(hX, y_0_1, z_1_2, 
+													  o, o + t * (float)i,
+													  1.0f, -cosinus, sinus,
+													  0.0f, -sinus, -cosinus);
+			m_vertices[1+4*i] = irr::video::S3DVertexTangents(hX, y_0_1, z_1_2, 
 													  -1.0f, cosinus, -sinus, 
 													  vertexColor,
-													  t, o + t * (float)i);
-			m_vertices[2+4*i] = irr::video::S3DVertex(hX, y_2_3, z_3_4, 
+													  t, o + t * (float)i,
+													  1.0f, cosinus, -sinus,
+													  0.0f, -sinus, -cosinus);
+			m_vertices[2+4*i] = irr::video::S3DVertexTangents(hX, y_2_3, z_3_4, 
 													  -1.0f, -cosinus, sinus,
 													  vertexColor,
-													  2 * t, o + t * (float)i);
-			m_vertices[3+4*i] = irr::video::S3DVertex(-hX, y_2_3, z_3_4, 
+													  2 * t, o + t * (float)i,
+													  -1.0f, cosinus, -sinus,
+													  0.0f, -sinus, -cosinus);
+			m_vertices[3+4*i] = irr::video::S3DVertexTangents(-hX, y_2_3, z_3_4, 
 													  1.0f, -cosinus, sinus,
 													  vertexColor,
-													  t, o + t * (float)i);
+													  t, o + t * (float)i,
+													  -1.0f, -cosinus, sinus,
+													  0.0f, -sinus, -cosinus);
 		}
 	}
 
@@ -261,7 +313,7 @@ irr::u32 CurveRoomSceneNode::getVertexCount() const
 	return m_verticesCount;
 }
 
-const irr::video::S3DVertex* CurveRoomSceneNode::getVertices() const
+const irr::video::S3DVertexTangents* CurveRoomSceneNode::getVertices() const
 {
 	return m_vertices;
 }

@@ -5,7 +5,8 @@
 StraightRoomSceneNode::StraightRoomSceneNode(irr::scene::ISceneNode* parent,
 						irr::scene::ISceneManager* mgr,
 						irr::s32 id,
-						irr::video::ITexture* texture,
+						irr::video::ITexture* diffuseTexture,
+						irr::video::ITexture* normalMapTexture,
 						irr::u32 sectionCount,
 						const irr::core::vector3df& halfSize,
 						const irr::core::vector3df& position,
@@ -25,12 +26,35 @@ StraightRoomSceneNode::StraightRoomSceneNode(irr::scene::ISceneNode* parent,
 	m_box.MaxEdge.set(0,0,0);
 	m_box.MinEdge.set(0,0,0);
 
-	// create m_material
-	m_material.Lighting = true;
-	m_material.AntiAliasing = ANTIALIASING;
-	m_material.setTexture(0, texture);
+// create m_material
+	//lighting
+	if (!USE_OWN_SHADER_LIGHTING)
+		m_material.Lighting = true;
+	else
+		m_material.Lighting = false;
+
+	//bump mapping and parallax mapping
+	if (USE_BUMP_MAPPING)
+		m_material.MaterialType = irr::video::EMT_NORMAL_MAP_SOLID;
+	else if (USE_PARALLAX_MAPPING)
+	{
+		m_material.MaterialType = irr::video::EMT_PARALLAX_MAP_SOLID;
+		m_material.MaterialTypeParam = ADJUST_HEIGHT_FOR_PARALLAX;
+	}
+	else
+		m_material.MaterialType = irr::video::EMT_SOLID;
+
+// set no glitter
+//	m_material.SpecularColor.set(0, 0, 0, 0);
+//	m_material.Shininess = 0.0f;
+
+//set Textures
+	m_material.setTexture(0, diffuseTexture);
+	if (normalMapTexture)
+		m_material.setTexture(1, normalMapTexture);
 	m_material.TextureLayer[0].TextureWrapU = irr::video::ETC_REPEAT;
 	m_material.TextureLayer[0].TextureWrapV = irr::video::ETC_REPEAT;
+	m_material.AntiAliasing = ANTIALIASING;
 
 	m_halfSize = halfSize;
 	const irr::f32 hX = m_halfSize.X;
@@ -53,7 +77,7 @@ StraightRoomSceneNode::StraightRoomSceneNode(irr::scene::ISceneNode* parent,
 	                     0--------1
 	*/
 	irr::video::SColor vertexColor = irr::video::SColor(255,255,255,255);
-
+/*
 	for (irr::u32 i = 0; i < m_sectionCount + 1; i++)
 	{
 		m_vertices[0+4*i] = irr::video::S3DVertex(-hX, -hY, (float)i * Z,
@@ -72,6 +96,34 @@ StraightRoomSceneNode::StraightRoomSceneNode(irr::scene::ISceneNode* parent,
 												  1.0f, -1.0f, 0.0f,
 												  vertexColor,
 												  t, o + t * (float)i);
+	}*/
+
+	for (irr::u32 i = 0; i < m_sectionCount + 1; i++)
+	{
+		m_vertices[0+4*i] = irr::video::S3DVertexTangents(-hX, -hY, (float)i * Z,
+														1.0f, 1.0f, 0.0f,
+														vertexColor,
+														o, o + t * (float)i,
+														1.0f, -1.0f, 0.0f,
+														0.0f,  0.0f, -1.0f);
+		m_vertices[1+4*i] = irr::video::S3DVertexTangents( hX, -hY, (float)i * Z,
+														-1.0f, 1.0f, 0.0f,
+														vertexColor,
+														t, o + t * (float)i,
+														1.0f, 1.0f, 0.0f,
+														0.0f,  0.0f, -1.0f);
+		m_vertices[2+4*i] = irr::video::S3DVertexTangents( hX, hY, (float)i * Z,
+														 -1.0f, -1.0f, 0.0f,
+														 vertexColor,
+														 2 * t, o + t * (float)i,
+														 -1.0f, 1.0f, 0.0f,
+														 0.0f,  0.0f, -1.0f);
+		m_vertices[3+4*i] = irr::video::S3DVertexTangents(-hX, hY, (float)i * Z,
+														 1.0f, -1.0f, 0.0f,
+														 vertexColor,
+														 t, o + t * (float)i,
+														 -1.0f, -1.0f, 0.0f,
+														 0.0f,  0.0f, -1.0f);
 	}
 
 	// create indices
@@ -133,7 +185,7 @@ irr::u32 StraightRoomSceneNode::getVertexCount() const
 	return m_verticesCount;
 }
 
-const irr::video::S3DVertex* StraightRoomSceneNode::getVertices() const
+const irr::video::S3DVertexTangents* StraightRoomSceneNode::getVertices() const
 {
 	return m_vertices;
 }
