@@ -1,10 +1,12 @@
 //Author Oleh Havryliuk 07.2015
 #include "CubicSceneNode.h"
+#include "Constants.h"
 
 CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent, 
 								irr::scene::ISceneManager* mgr,
 								irr::s32 id,
-								irr::video::ITexture* texture,
+								irr::video::ITexture* diffuseTexture,
+								irr::video::ITexture* normalMapTexture,
 								const irr::core::vector3df& halfSize,
 								const irr::core::vector3df& position,
 								const irr::core::vector3df& rotation,
@@ -13,13 +15,30 @@ CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent,
 {
 	setAutomaticCulling(irr::scene::EAC_OFF);
 
-	// create m_material
-	//m_material.MaterialType = irr::video::EMT_SOLID;
-	m_material.Lighting = true;
-	m_material.setTexture(0, texture);
-	m_material.AntiAliasing=0;
+// create m_material
+	//lighting
+	if (!USE_OWN_SHADER_LIGHTING)
+		m_material.Lighting = true;
+	else
+		m_material.Lighting = false;
+
+	//bump mapping and parallax mapping
+	if (USE_BUMP_MAPPING)
+		m_material.MaterialType = irr::video::EMT_NORMAL_MAP_SOLID;
+	else if (USE_PARALLAX_MAPPING)
+	{
+		m_material.MaterialType = irr::video::EMT_PARALLAX_MAP_SOLID;
+		m_material.MaterialTypeParam = ADJUST_HEIGHT_FOR_PARALLAX;
+	}
+	else
+		m_material.MaterialType = irr::video::EMT_SOLID;
+
+	m_material.setTexture(0, diffuseTexture);
+	if (normalMapTexture)
+		m_material.setTexture(1, normalMapTexture);
 	m_material.TextureLayer[0].TextureWrapU = irr::video::ETC_CLAMP_TO_BORDER;
 	m_material.TextureLayer[0].TextureWrapV = irr::video::ETC_CLAMP_TO_BORDER;
+	m_material.AntiAliasing=0;
 
 	const irr::f32 hX = halfSize.X;
 	const irr::f32 hY = halfSize.Y;
@@ -42,14 +61,14 @@ CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent,
      -3-1-4     3-1-4         |//    |
 	                     0--------1
 	*/
-	m_vertices[0] = irr::video::S3DVertex(-hX,-hY,-hZ, -1,-1,-1, vertexColor, o, o);
-	m_vertices[1] = irr::video::S3DVertex( hX,-hY,-hZ,  1,-1,-1, vertexColor, t, o);
-	m_vertices[2] = irr::video::S3DVertex( hX, hY,-hZ,  1, 1,-1, vertexColor, t, 0.95f);
-	m_vertices[3] = irr::video::S3DVertex(-hX, hY,-hZ, -1, 1,-1, vertexColor, o, 0.95f);
-	m_vertices[4] = irr::video::S3DVertex(-hX,-hY, hZ, -1,-1, 1, vertexColor, o, 0.05f);
-	m_vertices[5] = irr::video::S3DVertex( hX,-hY, hZ,  1,-1, 1, vertexColor, t, 0.05f);
-	m_vertices[6] = irr::video::S3DVertex( hX, hY, hZ,  1, 1, 1, vertexColor, t, t);
-	m_vertices[7] = irr::video::S3DVertex(-hX, hY, hZ,  1, 1, 1, vertexColor, o, t);
+	m_vertices[0] = irr::video::S3DVertexTangents(-hX,-hY,-hZ,  0.0f,-1.0f,-1.0f, vertexColor, o, o,	  1.0f, 0.0f, 0.0f,  0.0f,-1.0f, 1.0f);
+	m_vertices[1] = irr::video::S3DVertexTangents( hX,-hY,-hZ,  0.0f,-1.0f,-1.0f, vertexColor, t, o,	  1.0f, 0.0f, 0.0f,  0.0f,-1.0f, 1.0f);
+	m_vertices[2] = irr::video::S3DVertexTangents( hX, hY,-hZ,  0.0f, 1.0f,-1.0f, vertexColor, t, 0.5f,  1.0f, 0.0f, 0.0f,  0.0f,-1.0f,-1.0f);
+	m_vertices[3] = irr::video::S3DVertexTangents(-hX, hY,-hZ,  0.0f, 1.0f,-1.0f, vertexColor, o, 0.5f,  1.0f, 0.0f, 0.0f,  0.0f,-1.0f,-1.0f);
+	m_vertices[4] = irr::video::S3DVertexTangents(-hX,-hY, hZ,  0.0f,-1.0f, 1.0f, vertexColor, o, 0.1f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f, 1.0f);
+	m_vertices[5] = irr::video::S3DVertexTangents( hX,-hY, hZ,  0.0f,-1.0f, 1.0f, vertexColor, t, 0.1f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f, 1.0f);
+	m_vertices[6] = irr::video::S3DVertexTangents( hX, hY, hZ,  0.0f, 1.0f, 1.0f, vertexColor, t, 0.6f,	  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,-1.0f);
+	m_vertices[7] = irr::video::S3DVertexTangents(-hX, hY, hZ,  0.0f, 1.0f, 1.0f, vertexColor, o, 0.6,	  1.0f, 0.0f, 0.0f,	 0.0f, 1.0f,-1.0f);
 
 	// create indices
 	for (irr::s32 i = 0; i < 3; i++)
@@ -81,7 +100,9 @@ CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent,
 	m_indices[35] = 4;
 
 	m_box.reset(m_vertices[0].Pos);
-	m_box.addInternalPoint(m_vertices[6].Pos);				 
+	m_box.addInternalPoint(m_vertices[6].Pos);
+
+	//setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
 }
 
 void CubicSceneNode::OnRegisterSceneNode()

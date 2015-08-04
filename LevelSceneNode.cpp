@@ -104,8 +104,6 @@ bool LevelSceneNode::addVehicleTo(irr::scene::ISceneNode* parent)
 
 //update speed vector
 		m_vehicle->m_speedVector = m_normalizedDistanceVector * m_vehicle->m_speedScalar;
-		
-		m_lastTime = m_device->getTimer()->getTime();
 	}
 
 	return true;
@@ -138,7 +136,7 @@ bool LevelSceneNode::loadTestLevel()
 			m_driver->makeNormalMapTexture(normalMapTexture, NORMAL_MAP_HEIGHT_TEXTURE_FACTOR); 
 	}
 	
-	addStraightNode(10, L"0000000000");
+	addStraightNode(10, L"Bt0R0L0r0l");
 	addCurveNode(10, 90.0f, D_UP, L"");
 	addCurveNode(10, 90.0f, D_DOWN, L"");
 	addCurveNode(10, 90.0f, D_RIGHT, L"");
@@ -150,8 +148,8 @@ bool LevelSceneNode::loadTestLevel()
 																				LIGHT_COLOR, 
 																				LIGHT_RADIUS);
 	irr::scene::ISceneNodeAnimator* anim =
-	m_sceneManager->createFlyCircleAnimator (irr::core::vector3df(0.0f, 0.0f, 100.0f), 50.0f, 0.001f, irr::core::vector3df(1.0f, 1.0f, 0.0f));
-	lightNode->addAnimator(anim);
+	m_sceneManager->createFlyCircleAnimator (irr::core::vector3df(0.0f, 0.0f, 0.0f), 50.0f, 0.001f, irr::core::vector3df(0.0f, 0.0f, 1.0f));
+	//lightNode->addAnimator(anim);
 	anim->drop();
 
 // attach billboard to the light
@@ -168,7 +166,7 @@ bool LevelSceneNode::loadTestLevel()
 	//irr::video::SLight& light = lightNode->getLightData();
 	//light.Type = irr::video::ELT_SPOT;
 	//light.OuterCone = LIGHT_CONE_ANGLE;
-	//lightNode->setParent(m_sceneManager->getActiveCamera());
+	lightNode->setParent(m_sceneManager->getActiveCamera());
 
 	return true;									
 }
@@ -284,6 +282,11 @@ bool LevelSceneNode::loadLevelFromXML(const irr::io::path& filePath)
 //explosion
 	addExplosionNodeWithTextureSheet(TEXTURE_PATH + EXPLOSION_TEXTURE_NAME_DEFAULT);
 
+//update delay bug fix
+	m_device->run();
+	m_lastTime = m_device->getTimer()->getTime();
+	m_gameManager->setGameState(GS_PLAYING);
+
 	return true;
 }
 
@@ -311,6 +314,7 @@ void LevelSceneNode::update()
 	{
 		irr::u32 newTime = m_device->getTimer()->getTime();
 		irr::f32 deltaTimeInSeconds = (float)(newTime - m_lastTime) / 1000.0f;
+
 		m_lastTime = newTime;
 
 //process key input
@@ -318,6 +322,8 @@ void LevelSceneNode::update()
 
 //nav points
 		irr::core::vector3df vehiclePosition = m_vehicle->m_sceneNode->getPosition();
+		//if (m_lastTime < 2010)
+		//	printf("%f %f %f\n", vehiclePosition.X, vehiclePosition.Y, vehiclePosition.Z);
 		//irr::core::vector3df leftToNavPointVector = m_normalizedDistanceVector * (m_distanceFullBNP - m_distancePassedBNP);
 		irr::core::vector3df leftToNavPointVector = m_normalizedDistanceVector * (m_distanceFullBNP + 2.0f * m_distanceBNPInputDelta - m_distancePassedBNP);
 		m_distancePassedBNP += m_vehicle->m_speedScalar * deltaTimeInSeconds;
@@ -367,6 +373,8 @@ void LevelSceneNode::update()
 		}
 		else
 		{
+			//if (m_lastTime < 2010)
+			//	printf("%f %f %f\n", vehiclePosition.X, vehiclePosition.Y, vehiclePosition.Z);
 			vehiclePosition += m_vehicle->m_speedVector * deltaTimeInSeconds;
 		}
 
@@ -377,7 +385,7 @@ void LevelSceneNode::update()
 
 //check for obstacle collisions
 		checkForObstacleCollisions();
-
+		
 		//m_vehicle->update(deltaTimeInSeconds);
 	}
 }
@@ -595,6 +603,7 @@ bool LevelSceneNode::addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sect
 										m_sceneManager,
 										-1,
 										m_driver->getTexture(TEXTURE_PATH + WALL_TEXTURE_NAME_DEFAULT),
+										m_driver->getTexture(TEXTURE_PATH + WALL_NORMAL_MAP_TEXTURE_NAME_DEFAULT),
 										halfSize,
 										position,
 										rotation);
@@ -621,7 +630,9 @@ bool LevelSceneNode::addCameraTo(irr::scene::ISceneNode* parent)
 	m_cameraNode->setTarget(m_currentCameraTarget);
 	startCameraTargetAnimation(m_currentCameraTarget, m_normalizedDistanceVector * CAMERA_TARGET_DISTANCE);
 
-	//m_sceneManager->addCameraSceneNodeFPS();
+	//irr::scene::ICameraSceneNode* fpsCamera = m_sceneManager->addCameraSceneNodeFPS();
+	//fpsCamera->setPosition(irr::core::vector3df(0.0f, 500.0f, 0.0f));
+	//fpsCamera->setTarget(irr::core::vector3df(0.0f, 0.0f, 0.0f));
 
 	return true;
 }
@@ -815,6 +826,9 @@ void LevelSceneNode::updateNodeBlocksIndex()
 
 void LevelSceneNode::checkForObstacleCollisions()
 {
+	if (m_obstacles.empty())
+		return;
+
 	IObstacle* currentObstacle = m_obstacles[m_currentObstacleIndex];
 	ISceneNode* node = m_vehicle->m_sceneNode;
 	if (currentObstacle->intersectsWithObject(node))
@@ -846,7 +860,7 @@ void LevelSceneNode::checkForObstacleCollisions()
 		m_explosionNode->setVisible(true);
 
 		m_gameManager->setGameState(GS_GAME_OVER);
-		printf("Collision! ");
+		//printf("Collision! ");
 		return;
 	}
 
@@ -854,7 +868,7 @@ void LevelSceneNode::checkForObstacleCollisions()
 	{
 		if (!currentObstacle->isNearObject(node))
 		{
-			printf("\nPassed obstacle!\n");
+			//printf("\nPassed obstacle!\n");
 			m_wasNearCurrentObstacle = false;
 			if (m_currentObstacleIndex + 1 < m_obstacles.size())
 				m_currentObstacleIndex++;
@@ -865,7 +879,7 @@ void LevelSceneNode::checkForObstacleCollisions()
 		if (currentObstacle->isNearObject(node))
 		{
 			m_wasNearCurrentObstacle = true;
-			printf("\nNear obstacle!\n");
+			//printf("\nNear obstacle!\n");
 		}
 	}
 

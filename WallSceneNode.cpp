@@ -5,12 +5,13 @@
 WallSceneNode::WallSceneNode(irr::scene::ISceneNode* parent, 
 							irr::scene::ISceneManager* mgr,
 							irr::s32 id,
-							irr::video::ITexture* texture,
+							irr::video::ITexture* diffuseTexture,
+							irr::video::ITexture* normalMapTexture,
 							const irr::core::vector3df& halfSize,
 							const irr::core::vector3df& position,
 							const irr::core::vector3df& rotation,
 							const irr::core::vector3df& scale) :
-							CubicSceneNode(parent, mgr, id, texture, halfSize, position, rotation, scale)
+							CubicSceneNode(parent, mgr, id, diffuseTexture, normalMapTexture, halfSize, position, rotation, scale)
 {
 }
 

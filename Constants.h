@@ -37,6 +37,7 @@ extern const irr::core::stringw DEFAULT_FONT;
 extern const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT;
 extern const irr::core::stringw ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT;
 extern const irr::core::stringw WALL_TEXTURE_NAME_DEFAULT;
+extern const irr::core::stringw WALL_NORMAL_MAP_TEXTURE_NAME_DEFAULT;
 extern const irr::core::stringw VEHICLE_MODEL_NAME_DEFAULT;
 extern const irr::core::stringw EXPLOSION_TEXTURE_NAME_DEFAULT;
 

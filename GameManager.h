@@ -14,7 +14,8 @@ enum GAME_STATE
 	GS_OPTIONS_MENU = 2,
 	GS_PLAYING		= 3,
 	GS_PAUSED		= 4,
-	GS_GAME_OVER	= 5
+	GS_GAME_OVER	= 5,
+	GS_LOADING		= 6
 };
 
 class GameManager

@@ -26,11 +26,12 @@ const irr::core::stringw LEVEL_PATH = L"Resources/Levels/";
 const irr::core::stringw DEFAULT_FONT = L"CourierNew_24px_bold.xml";
 
 //Resources names
-const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT = L"rockwall.jpg";
-const irr::core::stringw ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT = L"rockwall_height.bmp";
-//const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT = L"154.jpg";
-//const irr::core::stringw ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT = L"154_norm.JPG";
-const irr::core::stringw WALL_TEXTURE_NAME_DEFAULT = L"wall.bmp";
+const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT = L"167.JPG";
+//const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT = L"wall.JPG";
+const irr::core::stringw ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT = L"167_norm.JPG";
+const irr::core::stringw WALL_TEXTURE_NAME_DEFAULT = L"ft_stone01_c.png";
+//const irr::core::stringw WALL_TEXTURE_NAME_DEFAULT = L"wall.bmp";
+const irr::core::stringw WALL_NORMAL_MAP_TEXTURE_NAME_DEFAULT = "ft_stone01_n.png";
 const irr::core::stringw VEHICLE_MODEL_NAME_DEFAULT = L"Vehicle/Feisar_Ship.3DS";
 const irr::core::stringw EXPLOSION_TEXTURE_NAME_DEFAULT = L"explosion.png";
 
@@ -38,22 +39,22 @@ const irr::core::stringw EXPLOSION_TEXTURE_NAME_DEFAULT = L"explosion.png";
 const bool SHOW_FPS = true;
 
 //Room proportions
-const irr::core::vector3df ROOM_PROPORTIONS = irr::core::vector3df(8.0f, 6.0f, 8.0f);
+const irr::core::vector3df ROOM_PROPORTIONS = irr::core::vector3df(12.0f, 8.0f, 12.0f);
 const irr::core::vector3df ROOM_SCALE = irr::core::vector3df(10.0f, 10.0f, 10.0f);
-const irr::f32 WALL_WIDTH = 0.2f;
+const irr::f32 WALL_WIDTH = 1.0f;
 
 //Vehicle
 const irr::core::vector3df VEHICLE_SCALE = irr::core::vector3df(0.15f, 0.15f, 0.15f);
-const irr::core::vector3df VEHICLE_START_SPEED = irr::core::vector3df(0.0f, 0.0f, 500.0f);
+const irr::core::vector3df VEHICLE_START_SPEED = irr::core::vector3df(0.0f, 0.0f, 2000.0f);
 
 //Camera
 const irr::core::vector3df CAMERA_POSITION = irr::core::vector3df(0.0f, 100.0f, 100.0f);
 const irr::f32 CAMERA_TARGET_DISTANCE = 10000000.0f;
 
 //Light
-const irr::core::vector3df LIGHT_POSITION = irr::core::vector3df(0.0f , 150.0f, -2000.0f);
+const irr::core::vector3df LIGHT_POSITION = irr::core::vector3df(0.0f , 0.0f, 500.0f);
 const irr::video::SColorf LIGHT_COLOR = irr::video::SColorf(1.0f, 1.0f, 1.0f, 1.0f);
-const irr::f32 LIGHT_RADIUS = 150.0f;
+const irr::f32 LIGHT_RADIUS = 800.0f;
 const irr::f32 LIGHT_CONE_ANGLE = 40.0f;
 
 //Shader, Bump Mapping, Parallax Mapping
@@ -61,7 +62,7 @@ const bool CREATE_MIP_MAPS = true;
 const bool USE_OWN_SHADER_LIGHTING = false;
 const bool USE_BUMP_MAPPING = true;
 const bool USE_PARALLAX_MAPPING = false;
-const bool USE_HEIGHT_MAP_TEXTURE = true;
+const bool USE_HEIGHT_MAP_TEXTURE = false;
 const irr::f32 NORMAL_MAP_HEIGHT_TEXTURE_FACTOR = 20.0f;
 const irr::f32 ADJUST_HEIGHT_FOR_PARALLAX = 0.02;
 

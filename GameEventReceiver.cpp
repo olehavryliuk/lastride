@@ -32,7 +32,9 @@ bool GameEventReceiver::OnEvent(const irr::SEvent& event)
 	}
 	// Remember whether each key is down or up
 	if (event.EventType == irr::EET_KEY_INPUT_EVENT)
+	{
 		m_keyIsDown[event.KeyInput.Key] = event.KeyInput.PressedDown;
+	}
 
 	return false;
 }

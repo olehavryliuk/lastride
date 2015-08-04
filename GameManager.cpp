@@ -80,9 +80,9 @@ bool GameManager::loadTestLevel()
 	if (!m_levelSceneNode)
 		return false;
 
-	m_levelSceneNode->loadTestLevel();
+	m_gameState = GS_LOADING;
 
-	m_gameState = GS_PLAYING;
+	m_levelSceneNode->loadTestLevel();
 
 	m_device->getCursorControl()->setVisible(false);
 
@@ -97,9 +97,10 @@ bool GameManager::loadLevelFromXML(const irr::io::path& filePath)
 	if (!m_levelSceneNode)
 		return false;
 
+	m_gameState = GS_LOADING;
+
 	m_levelSceneNode->loadLevelFromXML(filePath);
 
-	m_gameState = GS_PLAYING;
 	m_device->getCursorControl()->setVisible(false);
 
 	m_levelSceneNode->drop();
@@ -111,9 +112,9 @@ bool GameManager::loadLevelFromXML(const irr::io::path& filePath)
 
 void GameManager::update()
 {
-	irr::u32 newTime = m_device->getTimer()->getTime();
-	irr::u32 deltaTime = newTime - m_lastTime;
-	m_lastTime = newTime;
+	//irr::u32 newTime = m_device->getTimer()->getTime();
+	//irr::u32 deltaTime = newTime - m_lastTime;
+	//m_lastTime = newTime;
 
 	m_levelSceneNode->update();
 }
@@ -131,7 +132,7 @@ void GameManager::run()
 	{
 		m_GUIEnviroment->drawAll();
 	}
-	else
+	else if (m_gameState == GS_PLAYING || m_gameState == GS_GAME_OVER)
 	{
 		m_sceneManager->drawAll();
 	}
