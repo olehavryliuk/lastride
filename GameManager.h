@@ -6,6 +6,7 @@
 #include "OptionsMenu.h"
 #include "GameEventReceiver.h"
 #include "LevelSceneNode.h"
+#include "ShaderManager.h"
 
 enum GAME_STATE
 {
@@ -21,18 +22,20 @@ enum GAME_STATE
 class GameManager
 {
 private:
-	irr::IrrlichtDevice* m_device;               //weak ref
-	irr::video::IVideoDriver* m_driver;			//weak ref
-	irr::scene::ISceneManager* m_sceneManager;	//weak ref
-	irr::gui::IGUIEnvironment* m_GUIEnviroment;	//weak ref
-	MainMenu* m_mainMenu;						//strong ref
-	OptionsMenu* m_optionsMenu;					//strong ref
-	GameEventReceiver* m_eventReceiver;			//strong ref
-	LevelSceneNode* m_levelSceneNode;			//weak ref
+	irr::IrrlichtDevice*			m_device;           //weak ref
+	irr::video::IVideoDriver*		m_driver;			//weak ref
+	irr::scene::ISceneManager*		m_sceneManager;		//weak ref
+	irr::gui::IGUIEnvironment*		m_GUIEnviroment;	//weak ref
 
-	irr::scene::ICameraSceneNode* m_FPSCamera;	//weak rer
-	GAME_STATE m_gameState;
-	irr::u32 m_lastTime;
+	ShaderManager*					m_shaderManager;	//strong ref
+	MainMenu*						m_mainMenu;			//strong ref
+	OptionsMenu*					m_optionsMenu;		//strong ref
+	GameEventReceiver*				m_eventReceiver;	//strong ref
+	LevelSceneNode*					m_levelSceneNode;	//weak ref
+
+	irr::scene::ICameraSceneNode*	m_FPSCamera;		//weak ref
+	GAME_STATE						m_gameState;
+	irr::u32						m_lastTime;
 
 public:
 	GameManager();
@@ -44,10 +47,12 @@ public:
 	bool initialize();
 	bool loadTestLevel();
 	bool loadLevelFromXML(const irr::io::path& filePath);
+	bool loadShaders();
 	void update();
 	void run();
 	irr::IrrlichtDevice* getDevice();
 	const GameEventReceiver* getEventReceiver();
+	ShaderManager* getShaderManager();
 
 	//bool addFPSCamera();
 };

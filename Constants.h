@@ -64,6 +64,11 @@ extern const irr::video::SColorf LIGHT_COLOR;
 extern const irr::f32 LIGHT_RADIUS;
 extern const irr::f32 LIGHT_CONE_ANGLE;
 
+extern const irr::video::SColorf AMBIENT_MATERIAL_DEFAULT;
+extern const irr::video::SColorf DIFFUSE_MATERIAL_DEFAULT;
+extern const irr::video::SColorf SPECULAR_MATERIAL_DEFAULT;
+extern const irr::f32 SPECULAR_POWER;
+
 //Shader, Bump Mapping, Parallax Mapping
 extern const bool CREATE_MIP_MAPS;
 extern const bool USE_OWN_SHADER_LIGHTING;

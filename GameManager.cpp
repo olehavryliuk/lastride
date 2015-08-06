@@ -4,13 +4,14 @@
 
 GameManager::GameManager()
 {
-	m_mainMenu = nullptr;
-	m_optionsMenu = nullptr;
-	m_eventReceiver = nullptr;
+	m_shaderManager  = nullptr;
+	m_mainMenu		 = nullptr;
+	m_optionsMenu	 = nullptr;
+	m_eventReceiver	 = nullptr;
 	m_levelSceneNode = nullptr;
-	m_FPSCamera = nullptr;
-	m_lastTime = 0;
-	m_gameState = GS_MAIN_MENU;
+	m_FPSCamera		 = nullptr;
+	m_lastTime		 = 0;
+	m_gameState		 = GS_MAIN_MENU;
 }
 
 bool GameManager::initialize()
@@ -18,14 +19,14 @@ bool GameManager::initialize()
 	m_eventReceiver = new GameEventReceiver();
 
     irr::SIrrlichtCreationParameters p;
-	p.DriverType = VIDEO_DRIVER_TYPE;
-	p.WindowSize = irr::core::dimension2d<irr::u32>(SCREEN_WIDTH_DEFAULT, SCREEN_HEIGHT_DEFAULT);
-	p.Bits = (irr::u8)COLOR_BITS;
-	p.Fullscreen = IS_FULLSCREEN;
+	p.DriverType	= VIDEO_DRIVER_TYPE;
+	p.WindowSize	= irr::core::dimension2d<irr::u32>(SCREEN_WIDTH_DEFAULT, SCREEN_HEIGHT_DEFAULT);
+	p.Bits			= (irr::u8)COLOR_BITS;
+	p.Fullscreen	= IS_FULLSCREEN;
 	p.Stencilbuffer = HAS_STENCILBUFFER;
-	p.Vsync = IS_VSYNC;
+	p.Vsync			= IS_VSYNC;
 	p.EventReceiver = m_eventReceiver;
-	p.AntiAlias = 0;
+	p.AntiAlias		= 0;
 
 	m_device = irr::createDeviceEx(p);
 
@@ -38,6 +39,11 @@ bool GameManager::initialize()
 
 //mip map texture creation flag
 	m_driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, CREATE_MIP_MAPS);
+
+//add shader manager
+	m_shaderManager = new ShaderManager(this);
+	if(!loadShaders())
+		m_device->getLogger()->log("GameManager->loadShaders FAILED!");
 
 //add menus
 	m_mainMenu = new MainMenu(this);
@@ -52,11 +58,17 @@ bool GameManager::initialize()
 
 GameManager::~GameManager()
 {
+	delete m_shaderManager;
 	delete m_mainMenu;
 	delete m_optionsMenu;
 	delete m_eventReceiver;
 
 	m_device->drop();
+}
+
+ShaderManager* GameManager::getShaderManager()
+{
+	return m_shaderManager;
 }
 
 GAME_STATE GameManager::getGameState()
@@ -106,6 +118,25 @@ bool GameManager::loadLevelFromXML(const irr::io::path& filePath)
 	m_levelSceneNode->drop();
 
 	m_mainMenu->setActive(false);
+
+	return true;
+}
+
+bool GameManager::loadShaders()
+{
+	if (!m_shaderManager)
+		return false;
+
+	if (USE_BUMP_MAPPING)
+	{
+		if(!m_shaderManager->initBumpMaterial())
+			return false;
+	}
+	else if (USE_PARALLAX_MAPPING)
+	{
+		if (!m_shaderManager->initParallaxMaterial())
+			return false;
+	}
 
 	return true;
 }

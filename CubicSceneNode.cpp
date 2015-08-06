@@ -17,21 +17,23 @@ CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent,
 
 // create m_material
 	//lighting
-	if (!USE_OWN_SHADER_LIGHTING)
-		m_material.Lighting = true;
-	else
+	if (USE_OWN_SHADER_LIGHTING)
 		m_material.Lighting = false;
+	else
+	{
+		m_material.Lighting = true;
 
 	//bump mapping and parallax mapping
-	if (USE_BUMP_MAPPING)
-		m_material.MaterialType = irr::video::EMT_NORMAL_MAP_SOLID;
-	else if (USE_PARALLAX_MAPPING)
-	{
-		m_material.MaterialType = irr::video::EMT_PARALLAX_MAP_SOLID;
-		m_material.MaterialTypeParam = ADJUST_HEIGHT_FOR_PARALLAX;
+		if (USE_BUMP_MAPPING)
+			m_material.MaterialType = irr::video::EMT_NORMAL_MAP_SOLID;
+		else if (USE_PARALLAX_MAPPING)
+		{
+			m_material.MaterialType = irr::video::EMT_PARALLAX_MAP_SOLID;
+			m_material.MaterialTypeParam = ADJUST_HEIGHT_FOR_PARALLAX;
+		}
+		else
+			m_material.MaterialType = irr::video::EMT_SOLID;
 	}
-	else
-		m_material.MaterialType = irr::video::EMT_SOLID;
 
 	m_material.setTexture(0, diffuseTexture);
 	if (normalMapTexture)

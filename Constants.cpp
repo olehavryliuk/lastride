@@ -45,7 +45,7 @@ const irr::f32 WALL_WIDTH = 1.0f;
 
 //Vehicle
 const irr::core::vector3df VEHICLE_SCALE = irr::core::vector3df(0.15f, 0.15f, 0.15f);
-const irr::core::vector3df VEHICLE_START_SPEED = irr::core::vector3df(0.0f, 0.0f, 2000.0f);
+const irr::core::vector3df VEHICLE_START_SPEED = irr::core::vector3df(0.0f, 0.0f, 500.0f);
 
 //Camera
 const irr::core::vector3df CAMERA_POSITION = irr::core::vector3df(0.0f, 100.0f, 100.0f);
@@ -57,9 +57,14 @@ const irr::video::SColorf LIGHT_COLOR = irr::video::SColorf(1.0f, 1.0f, 1.0f, 1.
 const irr::f32 LIGHT_RADIUS = 800.0f;
 const irr::f32 LIGHT_CONE_ANGLE = 40.0f;
 
+const irr::video::SColorf AMBIENT_MATERIAL_DEFAULT = irr::video::SColorf(0.1f, 0.1f, 0.1f, 1.0f);
+const irr::video::SColorf DIFFUSE_MATERIAL_DEFAULT = irr::video::SColorf(0.5f, 0.5f, 0.5f, 1.0f);
+const irr::video::SColorf SPECULAR_MATERIAL_DEFAULT = irr::video::SColorf(0.2f, 0.2f, 0.2f, 1.0f);
+const irr::f32 SPECULAR_POWER = 2.0f;
+
 //Shader, Bump Mapping, Parallax Mapping
 const bool CREATE_MIP_MAPS = true;
-const bool USE_OWN_SHADER_LIGHTING = false;
+const bool USE_OWN_SHADER_LIGHTING = true;
 const bool USE_BUMP_MAPPING = true;
 const bool USE_PARALLAX_MAPPING = false;
 const bool USE_HEIGHT_MAP_TEXTURE = false;

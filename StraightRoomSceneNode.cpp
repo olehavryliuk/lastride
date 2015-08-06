@@ -28,21 +28,27 @@ StraightRoomSceneNode::StraightRoomSceneNode(irr::scene::ISceneNode* parent,
 
 // create m_material
 	//lighting
-	if (!USE_OWN_SHADER_LIGHTING)
-		m_material.Lighting = true;
-	else
-		m_material.Lighting = false;
-
-	//bump mapping and parallax mapping
-	if (USE_BUMP_MAPPING)
-		m_material.MaterialType = irr::video::EMT_NORMAL_MAP_SOLID;
-	else if (USE_PARALLAX_MAPPING)
+	if (USE_OWN_SHADER_LIGHTING)
 	{
-		m_material.MaterialType = irr::video::EMT_PARALLAX_MAP_SOLID;
-		m_material.MaterialTypeParam = ADJUST_HEIGHT_FOR_PARALLAX;
+		m_material.Lighting = false;
 	}
 	else
-		m_material.MaterialType = irr::video::EMT_SOLID;
+	{
+		m_material.Lighting = true;
+
+		//bump mapping and parallax mapping
+		if (USE_BUMP_MAPPING)
+		{
+			m_material.MaterialType = irr::video::EMT_NORMAL_MAP_SOLID;
+		}
+		else if (USE_PARALLAX_MAPPING)
+		{
+			m_material.MaterialType = irr::video::EMT_PARALLAX_MAP_SOLID;
+			m_material.MaterialTypeParam = ADJUST_HEIGHT_FOR_PARALLAX;
+		}
+		else
+			m_material.MaterialType = irr::video::EMT_SOLID;
+	}
 
 // set no glitter
 //	m_material.SpecularColor.set(0, 0, 0, 0);

@@ -76,14 +76,17 @@ bool LevelSceneNode::addVehicleTo(irr::scene::ISceneNode* parent)
 		return false;
 
 //add spot light to vehicle
-	m_lightNode = m_sceneManager->addLightSceneNode(m_vehicle->m_sceneNode,
-																				LIGHT_POSITION,
-																				LIGHT_COLOR, 
-																				LIGHT_RADIUS);
-	irr::video::SLight& light = m_lightNode->getLightData();
-	light.Type = irr::video::ELT_SPOT;
-	light.OuterCone = 40.0f;
-	m_lightNode->setRotation(irr::core::vector3df(0.0f, 180.0f, 0.0f));
+	if (!USE_OWN_SHADER_LIGHTING)
+	{
+		m_lightNode = m_sceneManager->addLightSceneNode(m_vehicle->m_sceneNode,
+														LIGHT_POSITION,
+														LIGHT_COLOR, 
+														LIGHT_RADIUS);
+		irr::video::SLight& light = m_lightNode->getLightData();
+		light.Type = irr::video::ELT_SPOT;
+		light.OuterCone = 40.0f;
+		m_lightNode->setRotation(irr::core::vector3df(0.0f, 180.0f, 0.0f));
+	}
 
 //navigation points
 	if (!m_navigationPoints.empty())
@@ -123,10 +126,11 @@ bool LevelSceneNode::loadTestLevel()
     irr::scene::IMeshSceneNode* node = m_sceneManager->addMeshSceneNode(mesh);
 	node->setPosition(irr::core::vector3df(0.0f, -15.0f, 30.0f));
 	node->setRotation(irr::core::vector3df(0.0f, 180.0f, 0.0f));
-	node->setScale(irr::core::vector3df(0.05f, 0.05f, 0.05f));
-	node->setParent(m_sceneManager->getActiveCamera());
+	node->setScale(irr::core::vector3df(0.2f, 0.2f, 0.2f));
+	//node->setParent(m_sceneManager->getActiveCamera());
 	node->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
-	*/
+*/
+	
 
 	irr::video::ITexture* normalMapTexture = nullptr;
 	if (USE_BUMP_MAPPING || USE_PARALLAX_MAPPING)
@@ -143,30 +147,38 @@ bool LevelSceneNode::loadTestLevel()
 	addCurveNode(10, 90.0f, D_LEFT, L"");
 	addStraightNode(10, L"00TBLRbtrl");
 
-	irr::scene::ILightSceneNode* lightNode = m_sceneManager->addLightSceneNode(0,
+	m_sceneManager->addCameraSceneNodeFPS();
+
+	if(!USE_OWN_SHADER_LIGHTING)
+	{
+		irr::scene::ILightSceneNode* lightNode = m_sceneManager->addLightSceneNode(0,
 																				irr::core::vector3df(0.0f , 0.0f, 0.0f),
 																				LIGHT_COLOR, 
 																				LIGHT_RADIUS);
-	irr::scene::ISceneNodeAnimator* anim =
-	m_sceneManager->createFlyCircleAnimator (irr::core::vector3df(0.0f, 0.0f, 0.0f), 50.0f, 0.001f, irr::core::vector3df(0.0f, 0.0f, 1.0f));
-	//lightNode->addAnimator(anim);
-	anim->drop();
+		irr::scene::ISceneNodeAnimator* anim = m_sceneManager->createFlyCircleAnimator (irr::core::vector3df(0.0f, 0.0f, 0.0f), 
+																						50.0f, 
+																						0.001f, 
+																						irr::core::vector3df(0.0f, 0.0f, 1.0f));
+		//lightNode->addAnimator(anim);
+		anim->drop();
 
-// attach billboard to the light
-	irr::scene::IBillboardSceneNode* bill =
-		m_sceneManager->addBillboardSceneNode(lightNode, irr::core::dimension2d<irr::f32>(60, 60));
+	// attach billboard to the light
+		irr::scene::IBillboardSceneNode* bill = m_sceneManager->addBillboardSceneNode(lightNode, irr::core::dimension2d<irr::f32>(60, 60));
+		bill->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+		bill->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, false);
+		bill->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
+		bill->setMaterialTexture(0, m_driver->getTexture(TEXTURE_PATH + "particlewhite.bmp"));
 
-	bill->setMaterialFlag(irr::video::EMF_LIGHTING, false);
-	bill->setMaterialFlag(irr::video::EMF_ZWRITE_ENABLE, false);
-	bill->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
-	bill->setMaterialTexture(0, m_driver->getTexture(TEXTURE_PATH + "particlewhite.bmp"));
+		//irr::video::SLight& light = lightNode->getLightData();
+		//light.Type = irr::video::ELT_SPOT;
+		//light.OuterCone = LIGHT_CONE_ANGLE;
+		lightNode->setParent(m_sceneManager->getActiveCamera());
+	}
 
-	m_sceneManager->addCameraSceneNodeFPS();
-
-	//irr::video::SLight& light = lightNode->getLightData();
-	//light.Type = irr::video::ELT_SPOT;
-	//light.OuterCone = LIGHT_CONE_ANGLE;
-	lightNode->setParent(m_sceneManager->getActiveCamera());
+//update delay bug fix
+	m_device->run();
+	m_lastTime = m_device->getTimer()->getTime();
+	m_gameManager->setGameState(GS_PLAYING);
 
 	return true;									
 }
@@ -393,8 +405,8 @@ void LevelSceneNode::update()
 bool LevelSceneNode::addStraightNode(irr::u32 sectionsCount, irr::core::stringw initString)
 {
 	irr::video::ITexture* normalMapTexture = nullptr;
-		if (USE_BUMP_MAPPING || USE_PARALLAX_MAPPING)
-			normalMapTexture = m_driver->getTexture(TEXTURE_PATH + ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT);
+	if (USE_BUMP_MAPPING || USE_PARALLAX_MAPPING)
+		normalMapTexture = m_driver->getTexture(TEXTURE_PATH + ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT);
 
 	StraightRoomSceneNode* straightNode = new StraightRoomSceneNode(this,
 											m_sceneManager,
@@ -406,7 +418,16 @@ bool LevelSceneNode::addStraightNode(irr::u32 sectionsCount, irr::core::stringw 
 											m_currentFacePosition,
 											m_currentFaceRotation,
 											ROOM_SCALE);
-	straightNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
+	straightNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, false);
+
+//set shader material
+	if (USE_OWN_SHADER_LIGHTING)
+	{
+		if (USE_BUMP_MAPPING)
+			straightNode->setMaterialType((irr::video::E_MATERIAL_TYPE)m_gameManager->getShaderManager()->getBumpMaterial());
+		else if (USE_PARALLAX_MAPPING)
+			straightNode->setMaterialType((irr::video::E_MATERIAL_TYPE)m_gameManager->getShaderManager()->getParallaxMaterial());
+	}
 
 //add navigation points
 	const irr::u32 vertexCount = straightNode->getVertexCount();
@@ -472,8 +493,8 @@ bool LevelSceneNode::addStraightNode(irr::u32 sectionsCount, irr::core::stringw 
 bool LevelSceneNode::addCurveNode(irr::u32 sectionsCount, irr::f32 angle, DIRECTION direction, irr::core::stringw initString)
 {
 	irr::video::ITexture* normalMapTexture = nullptr;
-		if (USE_BUMP_MAPPING || USE_PARALLAX_MAPPING)
-			normalMapTexture = m_driver->getTexture(TEXTURE_PATH + ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT);
+	if (USE_BUMP_MAPPING || USE_PARALLAX_MAPPING)
+		normalMapTexture = m_driver->getTexture(TEXTURE_PATH + ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT);
 
 	CurveRoomSceneNode* curveNode = new CurveRoomSceneNode(this,
 										m_sceneManager,
@@ -489,6 +510,15 @@ bool LevelSceneNode::addCurveNode(irr::u32 sectionsCount, irr::f32 angle, DIRECT
 										m_currentFaceRotation,
 										ROOM_SCALE);
 	curveNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
+
+//set shader material
+	if (USE_OWN_SHADER_LIGHTING)
+	{
+		if (USE_BUMP_MAPPING)
+			curveNode->setMaterialType((irr::video::E_MATERIAL_TYPE)m_gameManager->getShaderManager()->getBumpMaterial());
+		else if (USE_PARALLAX_MAPPING)
+			curveNode->setMaterialType((irr::video::E_MATERIAL_TYPE)m_gameManager->getShaderManager()->getParallaxMaterial());
+	}
 
 //add navigation points
 	const irr::u32 vertexCount = curveNode->getVertexCount();
@@ -599,15 +629,27 @@ bool LevelSceneNode::addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sect
 			break;
 		}
 
+		irr::video::ITexture* normalMapTexture = nullptr;
+		if (USE_BUMP_MAPPING || USE_PARALLAX_MAPPING)
+			normalMapTexture = m_driver->getTexture(TEXTURE_PATH + WALL_NORMAL_MAP_TEXTURE_NAME_DEFAULT);
 		auto obstacleNode = new WallSceneNode(parent,
 										m_sceneManager,
 										-1,
 										m_driver->getTexture(TEXTURE_PATH + WALL_TEXTURE_NAME_DEFAULT),
-										m_driver->getTexture(TEXTURE_PATH + WALL_NORMAL_MAP_TEXTURE_NAME_DEFAULT),
+										normalMapTexture,
 										halfSize,
 										position,
 										rotation);
 		obstacleNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
+
+		//set shader material
+		if (USE_OWN_SHADER_LIGHTING)
+		{
+			if (USE_BUMP_MAPPING)
+				obstacleNode->setMaterialType((irr::video::E_MATERIAL_TYPE)m_gameManager->getShaderManager()->getBumpMaterial());
+			else if (USE_PARALLAX_MAPPING)
+				obstacleNode->setMaterialType((irr::video::E_MATERIAL_TYPE)m_gameManager->getShaderManager()->getParallaxMaterial());
+		}
 
 //insert obstacle pointer to m_obstacles array
 		m_obstacles.push_back(obstacleNode);
@@ -844,15 +886,15 @@ void LevelSceneNode::checkForObstacleCollisions()
 		m_explosionNode->setPosition(node->getAbsolutePosition());
 		m_cameraNode->setPosition(m_cameraNode->getAbsolutePosition());
 		m_cameraNode->setParent(m_sceneManager->getRootSceneNode());
-		irr::core::vector3df position = m_lightNode->getAbsolutePosition();
+		//irr::core::vector3df position = m_lightNode->getAbsolutePosition();
 		//irr::core::vector3df rotation = m_lightNode->getRotation();
 		
 		irr::core::matrix4 rotationMatrix;
 		rotationMatrix.setRotationDegrees(irr::core::vector3df(0.0f, 180.0f, 0.0f));
 		rotationMatrix = rotationMatrix * node->getAbsoluteTransformation();
-		m_lightNode->setRotation(rotationMatrix.getRotationDegrees());
-		m_lightNode->setParent(m_sceneManager->getRootSceneNode());
-		m_lightNode->setPosition(position);
+		//m_lightNode->setRotation(rotationMatrix.getRotationDegrees());
+		//m_lightNode->setParent(m_sceneManager->getRootSceneNode());
+		//m_lightNode->setPosition(position);
 		//m_lightNode->setRotation(irr::core::vector3df(0.0f, 0.0f, 0.0f));
 		node->setVisible(false);
 
