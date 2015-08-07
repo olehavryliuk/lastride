@@ -6,7 +6,7 @@ const irr::u32 SCREEN_WIDTH_DEFAULT = 1280;
 const irr::u32 SCREEN_HEIGHT_DEFAULT = 1024;
 
 //default device
-const irr::video::E_DRIVER_TYPE VIDEO_DRIVER_TYPE = irr::video::EDT_DIRECT3D9;
+const irr::video::E_DRIVER_TYPE VIDEO_DRIVER_TYPE = irr::video::EDT_OPENGL;
 const irr::u8 COLOR_BITS = 32;
 const bool IS_FULLSCREEN = false;
 const bool HAS_STENCILBUFFER = true;
@@ -58,13 +58,13 @@ const irr::f32 LIGHT_RADIUS = 800.0f;
 const irr::f32 LIGHT_CONE_ANGLE = 40.0f;
 
 const irr::video::SColorf AMBIENT_MATERIAL_DEFAULT = irr::video::SColorf(0.1f, 0.1f, 0.1f, 1.0f);
-const irr::video::SColorf DIFFUSE_MATERIAL_DEFAULT = irr::video::SColorf(0.5f, 0.5f, 0.5f, 1.0f);
-const irr::video::SColorf SPECULAR_MATERIAL_DEFAULT = irr::video::SColorf(0.2f, 0.2f, 0.2f, 1.0f);
+const irr::video::SColorf DIFFUSE_MATERIAL_DEFAULT = irr::video::SColorf(0.6f, 0.6f, 0.6f, 1.0f);
+const irr::video::SColorf SPECULAR_MATERIAL_DEFAULT = irr::video::SColorf(0.1f, 0.1f, 0.1f, 1.0f);
 const irr::f32 SPECULAR_POWER = 2.0f;
 
 //Shader, Bump Mapping, Parallax Mapping
 const bool CREATE_MIP_MAPS = true;
-const bool USE_OWN_SHADER_LIGHTING = true;
+const bool USE_OWN_SHADER_LIGHTING = false;
 const bool USE_BUMP_MAPPING = true;
 const bool USE_PARALLAX_MAPPING = false;
 const bool USE_HEIGHT_MAP_TEXTURE = false;

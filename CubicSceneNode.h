@@ -9,6 +9,7 @@ class CubicSceneNode : public irr::scene::ISceneNode
 protected:
 	irr::core::aabbox3d<irr::f32> m_box;
 	irr::u16 m_indices[36];
+	//irr::u16 m_indices[18];
 	irr::video::S3DVertexTangents m_vertices[8];
 	irr::video::SMaterial m_material;
 

@@ -139,13 +139,40 @@ bool LevelSceneNode::loadTestLevel()
 		if (normalMapTexture && USE_HEIGHT_MAP_TEXTURE)
 			m_driver->makeNormalMapTexture(normalMapTexture, NORMAL_MAP_HEIGHT_TEXTURE_FACTOR); 
 	}
-	
-	addStraightNode(10, L"Bt0R0L0r0l");
-	addCurveNode(10, 90.0f, D_UP, L"");
-	addCurveNode(10, 90.0f, D_DOWN, L"");
-	addCurveNode(10, 90.0f, D_RIGHT, L"");
+
+//level
+	addStraightNode(10, L"BTRtLbrBlR");
+	addStraightNode(10, L"BTRtLbrBlR");
 	addCurveNode(10, 90.0f, D_LEFT, L"");
-	addStraightNode(10, L"00TBLRbtrl");
+	addCurveNode(10, 90.0f, D_LEFT, L"");
+	addStraightNode(10, L"BTRtLbrBlR");
+	addStraightNode(10, L"BTRtLbrBlR");
+	addCurveNode(10, 90.0f, D_LEFT, L"");
+	addStraightNode(2, L"BT");
+	addCurveNode(10, 90.0f, D_LEFT, L"");
+	addStraightNode(10, L"BTRtLbrBlR");
+	addCurveNode(10, 90.0f, D_UP, L"");
+	addCurveNode(10, 90.0f, D_LEFT, L"");
+	addCurveNode(10, 90.0f, D_LEFT, L"");
+	addCurveNode(10, 90.0f, D_UP, L"");
+	addStraightNode(10, L"BTRtLbrBlR");
+	addCurveNode(10, 90.0f, D_UP, L"");
+	addStraightNode(2, L"BT");
+	addCurveNode(10, 90.0f, D_UP, L"");
+	addStraightNode(8, L"BTRtLbrl");
+	addCurveNode(10, 90.0f, D_LEFT, L"");
+	addCurveNode(10, 90.0f, D_UP, L"");
+	addCurveNode(10, 90.0f, D_LEFT, L"");
+	addStraightNode(12, L"BTRtLbrBlrTL");
+	addCurveNode(10, 90.0f, D_UP, L"");
+	addStraightNode(2, L"BT");
+	addCurveNode(10, 90.0f, D_UP, L"");
+	addStraightNode(12, L"BTRtLbrBlrTL");
+	addCurveNode(10, 90.0f, D_UP, L"");
+	addCurveNode(10, 90.0f, D_UP, L"");
+	addStraightNode(10, L"BTRtLbrBlR");
+	addCurveNode(5, 50.0f, D_LEFT, L"");
+	addStraightNode(10, L"BTRtLbrBlR");
 
 	m_sceneManager->addCameraSceneNodeFPS();
 
@@ -642,7 +669,7 @@ bool LevelSceneNode::addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sect
 										rotation);
 		obstacleNode->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
 
-		//set shader material
+//set shader material
 		if (USE_OWN_SHADER_LIGHTING)
 		{
 			if (USE_BUMP_MAPPING)

@@ -13,7 +13,8 @@ CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent,
 								const irr::core::vector3df& scale) :
 								irr::scene::ISceneNode(parent, mgr, id, position, rotation, scale)
 {
-	setAutomaticCulling(irr::scene::EAC_OFF);
+	setAutomaticCulling(irr::scene::EAC_BOX);
+//	setDebugDataVisible(irr::scene::EDS_BBOX);
 
 // create m_material
 	//lighting
@@ -62,15 +63,24 @@ CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent,
         0---------1/          |  //  |
      -3-1-4     3-1-4         |//    |
 	                     0--------1
-	*/
-	m_vertices[0] = irr::video::S3DVertexTangents(-hX,-hY,-hZ,  0.0f,-1.0f,-1.0f, vertexColor, o, o,	  1.0f, 0.0f, 0.0f,  0.0f,-1.0f, 1.0f);
-	m_vertices[1] = irr::video::S3DVertexTangents( hX,-hY,-hZ,  0.0f,-1.0f,-1.0f, vertexColor, t, o,	  1.0f, 0.0f, 0.0f,  0.0f,-1.0f, 1.0f);
+	*/ /*
+	m_vertices[0] = irr::video::S3DVertexTangents(-hX,-hY,-hZ,  0.0f,-1.0f,-1.0f, vertexColor, o, o,	 1.0f, 0.0f, 0.0f,  0.0f,-1.0f, 1.0f);
+	m_vertices[1] = irr::video::S3DVertexTangents( hX,-hY,-hZ,  0.0f,-1.0f,-1.0f, vertexColor, t, o,	 1.0f, 0.0f, 0.0f,  0.0f,-1.0f, 1.0f);
 	m_vertices[2] = irr::video::S3DVertexTangents( hX, hY,-hZ,  0.0f, 1.0f,-1.0f, vertexColor, t, 0.5f,  1.0f, 0.0f, 0.0f,  0.0f,-1.0f,-1.0f);
 	m_vertices[3] = irr::video::S3DVertexTangents(-hX, hY,-hZ,  0.0f, 1.0f,-1.0f, vertexColor, o, 0.5f,  1.0f, 0.0f, 0.0f,  0.0f,-1.0f,-1.0f);
 	m_vertices[4] = irr::video::S3DVertexTangents(-hX,-hY, hZ,  0.0f,-1.0f, 1.0f, vertexColor, o, 0.1f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f, 1.0f);
 	m_vertices[5] = irr::video::S3DVertexTangents( hX,-hY, hZ,  0.0f,-1.0f, 1.0f, vertexColor, t, 0.1f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f, 1.0f);
-	m_vertices[6] = irr::video::S3DVertexTangents( hX, hY, hZ,  0.0f, 1.0f, 1.0f, vertexColor, t, 0.6f,	  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,-1.0f);
-	m_vertices[7] = irr::video::S3DVertexTangents(-hX, hY, hZ,  0.0f, 1.0f, 1.0f, vertexColor, o, 0.6,	  1.0f, 0.0f, 0.0f,	 0.0f, 1.0f,-1.0f);
+	m_vertices[6] = irr::video::S3DVertexTangents( hX, hY, hZ,  0.0f, 1.0f, 1.0f, vertexColor, t, 0.6f,	 1.0f, 0.0f, 0.0f,  0.0f, 1.0f,-1.0f);
+	m_vertices[7] = irr::video::S3DVertexTangents(-hX, hY, hZ,  0.0f, 1.0f, 1.0f, vertexColor, o, 0.6,	 1.0f, 0.0f, 0.0f,	0.0f, 1.0f,-1.0f);
+*/
+	m_vertices[0] = irr::video::S3DVertexTangents(-hX,-hY,-hZ,  1.0f,-1.0f,-1.0f, vertexColor, o, o,	 1.0f, 1.0f, 1.0f,  0.0f,-1.0f, 1.0f);
+	m_vertices[1] = irr::video::S3DVertexTangents( hX,-hY,-hZ, -1.0f,-1.0f,-1.0f, vertexColor, t, o,	 1.0f,-1.0f,-1.0f,  0.0f,-1.0f, 1.0f);
+	m_vertices[2] = irr::video::S3DVertexTangents( hX, hY,-hZ, -1.0f, 1.0f,-1.0f, vertexColor, t, 0.5f,  1.0f, 1.0f,-1.0f,  0.0f,-1.0f,-1.0f);
+	m_vertices[3] = irr::video::S3DVertexTangents(-hX, hY,-hZ,  1.0f, 1.0f,-1.0f, vertexColor, o, 0.5f,  1.0f,-1.0f, 1.0f,  0.0f,-1.0f,-1.0f);
+	m_vertices[4] = irr::video::S3DVertexTangents(-hX,-hY, hZ,  1.0f,-1.0f, 1.0f, vertexColor, o, 0.1f,  1.0f, 1.0f,-1.0f,  0.0f, 1.0f, 1.0f);
+	m_vertices[5] = irr::video::S3DVertexTangents( hX,-hY, hZ, -1.0f,-1.0f, 1.0f, vertexColor, t, 0.1f,  1.0f,-1.0f, 1.0f,  0.0f, 1.0f, 1.0f);
+	m_vertices[6] = irr::video::S3DVertexTangents( hX, hY, hZ, -1.0f, 1.0f, 1.0f, vertexColor, t, 0.6f,	 1.0f, 1.0f, 1.0f,  0.0f, 1.0f,-1.0f);
+	m_vertices[7] = irr::video::S3DVertexTangents(-hX, hY, hZ,  1.0f, 1.0f, 1.0f, vertexColor, o, 0.6,	 1.0f,-1.0f,-1.0f,	0.0f, 1.0f,-1.0f);
 
 	// create indices
 	for (irr::s32 i = 0; i < 3; i++)
@@ -100,11 +110,30 @@ CubicSceneNode::CubicSceneNode(irr::scene::ISceneNode* parent,
 	m_indices[33] = 5;
 	m_indices[34] = 7;
 	m_indices[35] = 4;
-
+/*
+	m_indices[0]  = 1;
+	m_indices[1]  = 0;
+	m_indices[2]  = 2;
+	m_indices[3]  = 2;
+	m_indices[4]  = 0;
+	m_indices[5]  = 3;
+	m_indices[6]  = 2;
+	m_indices[7]  = 3;
+	m_indices[8]  = 6;
+	m_indices[9]  = 6;
+	m_indices[10] = 3;
+	m_indices[11] = 7;
+	m_indices[12] = 6;
+	m_indices[13] = 7;
+	m_indices[14] = 5;
+	m_indices[15] = 5;
+	m_indices[16] = 7;
+	m_indices[17] = 4;
+*/
 	m_box.reset(m_vertices[0].Pos);
 	m_box.addInternalPoint(m_vertices[6].Pos);
 
-	//setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
+	setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
 }
 
 void CubicSceneNode::OnRegisterSceneNode()
@@ -124,6 +153,7 @@ void CubicSceneNode::render()
 	driver->setTransform(irr::video::ETS_WORLD, AbsoluteTransformation);
 	driver->setMaterial(m_material);
 	driver->drawIndexedTriangleList(m_vertices, 8, m_indices, 12);
+	//driver->drawIndexedTriangleList(m_vertices, 8, m_indices, 6);
 }
 
 const irr::core::aabbox3d<irr::f32>& CubicSceneNode::getBoundingBox() const

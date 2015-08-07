@@ -116,7 +116,7 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 													  -cosinus, 1.0f, -sinus, 
 													  vertexColor,
 													  t, o + t * (float)i,
-													  cosinus, 1.0f, -sinus,
+													  cosinus, 1.0f, sinus,
 													  sinus, 0.0f, -cosinus);
 			m_vertices[2+4*i] = irr::video::S3DVertexTangents(x_1_2, hY, z_1_2, 
 													  -cosinus, -1.0f, -sinus, 
@@ -128,7 +128,7 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 													  cosinus, -1.0f, sinus, 
 													  vertexColor,
 													  t, o + t * (float)i,
-													  -cosinus, -1.0f, sinus,
+													  -cosinus, -1.0f, -sinus,
 													  sinus, 0.0f, -cosinus);
 		}
 	}
@@ -155,7 +155,7 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 													  -cosinus, 1.0f, sinus, 
 													  vertexColor,
 													  t, o + t * (float)i,
-													  cosinus, 1.0f, sinus,
+													  cosinus, 1.0f, -sinus,
 													  -sinus, 0.0f, -cosinus);
 			m_vertices[2+4*i] = irr::video::S3DVertexTangents(x_1_2, hY, z_1_2, 
 													  -cosinus, -1.0f, sinus, 
@@ -167,7 +167,7 @@ CurveRoomSceneNode::CurveRoomSceneNode(irr::scene::ISceneNode* parent,
 													  cosinus, -1.0f, -sinus, 
 													  vertexColor,
 													  t, o + t * (float)i,
-													  -cosinus, -1.0f, -sinus,
+													  -cosinus, -1.0f, sinus,
 													  -sinus, 0.0f, -cosinus);		
 		}
 	}
