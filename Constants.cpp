@@ -6,6 +6,7 @@ const irr::u32 SCREEN_WIDTH_DEFAULT = 1280;
 const irr::u32 SCREEN_HEIGHT_DEFAULT = 1024;
 
 //default device
+//const irr::video::E_DRIVER_TYPE VIDEO_DRIVER_TYPE = irr::video::EDT_DIRECT3D9;
 const irr::video::E_DRIVER_TYPE VIDEO_DRIVER_TYPE = irr::video::EDT_OPENGL;
 const irr::u8 COLOR_BITS = 32;
 const bool IS_FULLSCREEN = false;
@@ -26,11 +27,11 @@ const irr::core::stringw LEVEL_PATH = L"Resources/Levels/";
 const irr::core::stringw DEFAULT_FONT = L"CourierNew_24px_bold.xml";
 
 //Resources names
-const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT = L"167.JPG";
-//const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT = L"wall.JPG";
-const irr::core::stringw ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT = L"167_norm.JPG";
+//const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT = L"167.JPG";
+const irr::core::stringw ROOM_TEXTURE_NAME_DEFAULT = L"rockwall.JPG";
+const irr::core::stringw ROOM_NORMAL_MAP_TEXTURE_NAME_DEFAULT = L"rockwall_NRM.png";
 const irr::core::stringw WALL_TEXTURE_NAME_DEFAULT = L"ft_stone01_c.png";
-//const irr::core::stringw WALL_TEXTURE_NAME_DEFAULT = L"wall.bmp";
+//const irr::core::stringw WALL_TEXTURE_NAME_DEFAULT = L"rockwall.JPG";
 const irr::core::stringw WALL_NORMAL_MAP_TEXTURE_NAME_DEFAULT = "ft_stone01_n.png";
 const irr::core::stringw VEHICLE_MODEL_NAME_DEFAULT = L"Vehicle/Feisar_Ship.3DS";
 const irr::core::stringw EXPLOSION_TEXTURE_NAME_DEFAULT = L"explosion.png";
@@ -45,7 +46,7 @@ const irr::f32 WALL_WIDTH = 1.0f;
 
 //Vehicle
 const irr::core::vector3df VEHICLE_SCALE = irr::core::vector3df(0.15f, 0.15f, 0.15f);
-const irr::core::vector3df VEHICLE_START_SPEED = irr::core::vector3df(0.0f, 0.0f, 500.0f);
+const irr::core::vector3df VEHICLE_START_SPEED = irr::core::vector3df(0.0f, 0.0f, 400.0f);
 
 //Camera
 const irr::core::vector3df CAMERA_POSITION = irr::core::vector3df(0.0f, 100.0f, 100.0f);
@@ -64,12 +65,12 @@ const irr::f32 SPECULAR_POWER = 2.0f;
 
 //Shader, Bump Mapping, Parallax Mapping
 const bool CREATE_MIP_MAPS = true;
-const bool USE_OWN_SHADER_LIGHTING = false;
-const bool USE_BUMP_MAPPING = true;
-const bool USE_PARALLAX_MAPPING = false;
+const bool USE_OWN_SHADER_LIGHTING = true;
+const bool USE_BUMP_MAPPING = false;
+const bool USE_PARALLAX_MAPPING = true;
 const bool USE_HEIGHT_MAP_TEXTURE = false;
 const irr::f32 NORMAL_MAP_HEIGHT_TEXTURE_FACTOR = 20.0f;
-const irr::f32 ADJUST_HEIGHT_FOR_PARALLAX = 0.02;
+const irr::f32 ADJUST_HEIGHT_FOR_PARALLAX = 0.02f;
 
 //Explosion
 const irr::core::dimension2df EXPLOSION_TEXTURE_DIMENSION = irr::core::dimension2df(50.0f, 50.0f);

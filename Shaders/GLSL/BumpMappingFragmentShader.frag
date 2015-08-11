@@ -26,6 +26,6 @@ void main( void )
   
    float Attenuation = 1.0 / (0.000005 * LightDistanse * LightDistanse + 0.000003 * LightDistanse + 1.0);
 
-   gl_FragColor = ( Attenuation * (fvTotalDiffuse + fvTotalSpecular) + fvTotalAmbient );
+   gl_FragColor = Attenuation * (fvTotalDiffuse + fvTotalSpecular) + fvTotalAmbient;
        
 }

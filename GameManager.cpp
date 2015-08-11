@@ -41,9 +41,12 @@ bool GameManager::initialize()
 	m_driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, CREATE_MIP_MAPS);
 
 //add shader manager
-	m_shaderManager = new ShaderManager(this);
-	if(!loadShaders())
-		m_device->getLogger()->log("GameManager->loadShaders FAILED!");
+	if(USE_OWN_SHADER_LIGHTING)
+	{
+		m_shaderManager = new ShaderManager(this);
+		if(!loadShaders())
+			m_device->getLogger()->log("GameManager->loadShaders FAILED!");
+	}
 
 //add menus
 	m_mainMenu = new MainMenu(this);

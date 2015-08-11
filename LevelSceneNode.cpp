@@ -174,6 +174,47 @@ bool LevelSceneNode::loadTestLevel()
 	addCurveNode(5, 50.0f, D_LEFT, L"");
 	addStraightNode(10, L"BTRtLbrBlR");
 
+//add mine
+	irr::scene::IMesh* mesh = m_sceneManager->getMesh(MODEL_PATH + "Mine/mine.obj");
+    if (!mesh)
+    {
+        return false;
+    }
+	irr::scene::IMesh* tangentMesh = m_sceneManager->getMeshManipulator()->createMeshWithTangents(mesh);
+    irr::scene::IMeshSceneNode* node = m_sceneManager->addMeshSceneNode(tangentMesh);
+	node->setScale(irr::core::vector3df(0.3f, 0.3f, 0.3f));
+	node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+	node->setMaterialTexture(0, m_driver->getTexture(TEXTURE_PATH + "conc_base01_c.png"));
+	node->setMaterialTexture(1, m_driver->getTexture(TEXTURE_PATH + "subtlenormals.png"));
+
+	//bump mapping and parallax mapping
+
+
+	tangentMesh->drop();
+
+//set shader material
+	if (USE_OWN_SHADER_LIGHTING)
+	{
+		if (USE_BUMP_MAPPING)
+			node->setMaterialType((irr::video::E_MATERIAL_TYPE)m_gameManager->getShaderManager()->getBumpMaterial());
+		else if (USE_PARALLAX_MAPPING)
+			node->setMaterialType((irr::video::E_MATERIAL_TYPE)m_gameManager->getShaderManager()->getParallaxMaterial());
+	}
+	else
+	{
+		if (USE_BUMP_MAPPING)
+			node->setMaterialType(irr::video::EMT_NORMAL_MAP_SOLID);
+		else if (USE_PARALLAX_MAPPING)
+		{
+			node->setMaterialType(irr::video::EMT_PARALLAX_MAP_SOLID);
+			node->getMaterial(0).MaterialTypeParam = ADJUST_HEIGHT_FOR_PARALLAX;
+		}
+		else
+			node->setMaterialType(irr::video::EMT_SOLID);	
+	}
+
+/////////
+
 	m_sceneManager->addCameraSceneNodeFPS();
 
 	if(!USE_OWN_SHADER_LIGHTING)
