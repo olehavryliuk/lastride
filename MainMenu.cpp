@@ -80,8 +80,8 @@ bool MainMenu::OnEvent(const irr::SEvent& event)
 			case GUI_ID_RESUME_BUTTON:
 				return true;
 			case GUI_ID_NEW_GAME_BUTTON:
-				//m_gameManager->loadLevelFromXML(LEVEL_PATH + "testlevel.xml");
-				m_gameManager->loadTestLevel();
+				m_gameManager->loadLevelFromXML(LEVEL_PATH + "testlevel.xml");
+				//m_gameManager->loadTestLevel();
 				return true;
 			case GUI_ID_OPTIONS_BUTTON:
 				return true;

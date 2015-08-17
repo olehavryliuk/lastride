@@ -12,7 +12,7 @@ varying vec2  Texcoord;
 varying vec3  ViewDirection;
 varying float LightDistanse;
 
-float parallaxScale = 0.03;
+float parallaxScale = 0.1;
 
 vec2 parallaxMapping(in vec3 V, in vec2 T, out float parallaxHeight)
 {
@@ -168,7 +168,7 @@ void main(void)
 	float fParallaxHeight;
 	vec2 fvT = parallaxMapping(fvViewDirection, Texcoord, fParallaxHeight);
 	
-	float shadowMultiplier = parallaxSoftShadowMultiplier(fvViewDirection, Texcoord, fParallaxHeight - 0.02);
+	float shadowMultiplier = parallaxSoftShadowMultiplier(fvViewDirection, Texcoord, fParallaxHeight - 0.1);
 	//float shadowMultiplier = 1.0;
 	
 	gl_FragColor = normalMappingLighting(fvViewDirection, fvT, shadowMultiplier);	

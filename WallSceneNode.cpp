@@ -21,6 +21,7 @@ bool WallSceneNode::intersectsWithObject(irr::scene::ISceneNode* object)
 	irr::core::aabbox3d<irr::f32> objectNodeBox = object->getTransformedBoundingBox();
 	thisNodeBox.repair();
 	objectNodeBox.repair();
+
 	return thisNodeBox.intersectsWithBox(objectNodeBox);
 }
 

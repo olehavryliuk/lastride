@@ -34,6 +34,9 @@ LevelSceneNode::LevelSceneNode(GameManager* gameManager,
 	m_scratchedWallLR = D_NONE;
 	m_scratchedWallDU = D_NONE;
 
+//mines
+	m_mineTangentMesh = nullptr;
+
 //camera target animation
 	m_animatingCameraTarget = false;
 //	m_cameraTargetAnimationCount = 0;
@@ -60,10 +63,21 @@ LevelSceneNode::LevelSceneNode(GameManager* gameManager,
 	m_explosionAnimator = nullptr;
 //sparks node
 	m_sparksNode = nullptr;
+
+//init random
+	srand(m_device->getTimer()->getTime());
 }
 
 LevelSceneNode::~LevelSceneNode()
 {
+	for (int i = 0; i < m_mines.size(); i++)
+	{
+		m_mines[i]->drop();
+	}
+
+	if (m_mineTangentMesh)
+		m_mineTangentMesh->drop();
+
 	delete m_vehicle;
 	//if (m_explosionNode)
 	//	m_explosionNode->drop();
@@ -116,20 +130,22 @@ bool LevelSceneNode::loadTestLevel()
 {
 	if (!m_sceneManager)
 		return false;
-/*
+
 	//add vehicle
 	irr::scene::IMesh* mesh = m_sceneManager->getMesh(MODEL_PATH + "Vehicle\\Feisar_Ship.3DS");
     if (!mesh)
     {
         return false;
     }
-    irr::scene::IMeshSceneNode* node = m_sceneManager->addMeshSceneNode(mesh);
-	node->setPosition(irr::core::vector3df(0.0f, -15.0f, 30.0f));
+	irr::scene::IMesh* tangentMesh = m_sceneManager->getMeshManipulator()->createMeshWithTangents(mesh);
+    irr::scene::IMeshSceneNode* node = m_sceneManager->addMeshSceneNode(tangentMesh);
+	node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+	node->setPosition(irr::core::vector3df(0.0f, -20.0f, 1050.0f));
 	node->setRotation(irr::core::vector3df(0.0f, 180.0f, 0.0f));
-	node->setScale(irr::core::vector3df(0.2f, 0.2f, 0.2f));
+	node->setScale(irr::core::vector3df(0.3f, 0.3f, 0.3f));
 	//node->setParent(m_sceneManager->getActiveCamera());
 	node->setMaterialFlag(irr::video::EMF_NORMALIZE_NORMALS, true);
-*/
+
 	
 
 	irr::video::ITexture* normalMapTexture = nullptr;
@@ -141,7 +157,7 @@ bool LevelSceneNode::loadTestLevel()
 	}
 
 //level
-	addStraightNode(10, L"BTRtLbrBlR");
+	addStraightNode(10, L"BTR000rBlR");
 	addStraightNode(10, L"BTRtLbrBlR");
 	addCurveNode(10, 90.0f, D_LEFT, L"");
 	addCurveNode(10, 90.0f, D_LEFT, L"");
@@ -175,15 +191,16 @@ bool LevelSceneNode::loadTestLevel()
 	addStraightNode(10, L"BTRtLbrBlR");
 
 //add mine
-	irr::scene::IMesh* mesh = m_sceneManager->getMesh(MODEL_PATH + "Mine/mine.obj");
+	mesh = m_sceneManager->getMesh(MODEL_PATH + "Mine/mine.obj");
     if (!mesh)
     {
         return false;
     }
-	irr::scene::IMesh* tangentMesh = m_sceneManager->getMeshManipulator()->createMeshWithTangents(mesh);
-    irr::scene::IMeshSceneNode* node = m_sceneManager->addMeshSceneNode(tangentMesh);
+	tangentMesh = m_sceneManager->getMeshManipulator()->createMeshWithTangents(mesh);
+    node = m_sceneManager->addMeshSceneNode(tangentMesh);
+	node->setPosition(irr::core::vector3df(0.0f, 0.0f, 1200.0f));
 	node->setScale(irr::core::vector3df(0.3f, 0.3f, 0.3f));
-	node->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+	node->setMaterialFlag(irr::video::EMF_LIGHTING, true);
 	node->setMaterialTexture(0, m_driver->getTexture(TEXTURE_PATH + "conc_base01_c.png"));
 	node->setMaterialTexture(1, m_driver->getTexture(TEXTURE_PATH + "subtlenormals.png"));
 
@@ -538,6 +555,9 @@ bool LevelSceneNode::addStraightNode(irr::u32 sectionsCount, irr::core::stringw 
 		case 'T':
 			addObstacleTo(straightNode, i, OT_WALL, OP_TOP_2_3);
 			break;
+		case 'm':
+			addObstacleTo(straightNode, i, OT_MINE, OP_RANDOM);
+			break;
 		default:
 			break;
 		}
@@ -599,6 +619,19 @@ bool LevelSceneNode::addCurveNode(irr::u32 sectionsCount, irr::f32 angle, DIRECT
 		absoluteTransform.transformVect(navigationPoint);
 		m_navigationPoints.push_back(navigationPoint);
 	}
+/*
+//adding obstacles to node
+	for (irr::u32 i = 0; i < initString.size(); i++)
+	{
+		switch (initString[i])
+		{
+		case 'm':
+			addObstacleTo(curveNode, i, OT_MINE, OP_RANDOM);
+			break;
+		default:
+			break;
+		}
+	}*/
 
 //changing current face position and rotation
 	irr::core::vector3df newRotation;
@@ -645,9 +678,9 @@ bool LevelSceneNode::addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sect
 {
 	//IObstacle* obstacleNode;
 	irr::core::vector3df halfSize;
-	irr::core::vector3df position;
-	irr::core::vector3df rotation;
-	//irr::core::vector3df scale;
+	irr::core::vector3df position = irr::core::vector3df(0.0f, 0.0f, 0.0f);
+	irr::core::vector3df rotation = irr::core::vector3df(0.0f, 0.0f, 0.0f);
+	irr::core::vector3df scale = irr::core::vector3df(1.0f, 1.0f, 1.0f);
 
 	if (obstacleType == OT_WALL)
 	{
@@ -666,12 +699,10 @@ bool LevelSceneNode::addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sect
 		case OP_BOTTOM_1_2:
 			halfSize = irr::core::vector3df(ROOM_PROPORTIONS.X, ROOM_PROPORTIONS.Y / 2.0f, WALL_WIDTH);
 			position = irr::core::vector3df(0.0f, -ROOM_PROPORTIONS.Y / 2.0f, ROOM_PROPORTIONS.Z * (float)(2 * sectionNumber + 1));
-			rotation = irr::core::vector3df(0.0f, 0.0f, 0.0f);
 			break;
 		case OP_TOP_1_2:
 			halfSize = irr::core::vector3df(ROOM_PROPORTIONS.X, ROOM_PROPORTIONS.Y / 2.0f, WALL_WIDTH);
 			position = irr::core::vector3df(0.0f, ROOM_PROPORTIONS.Y / 2.0f, ROOM_PROPORTIONS.Z * (float)(2 * sectionNumber + 1));
-			rotation = irr::core::vector3df(0.0f, 0.0f, 0.0f);
 			break;
 		case OP_LEFT_2_3:
 			halfSize = irr::core::vector3df(ROOM_PROPORTIONS.Y, ROOM_PROPORTIONS.X * 2.0f / 3.0f, WALL_WIDTH);
@@ -686,12 +717,10 @@ bool LevelSceneNode::addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sect
 		case OP_BOTTOM_2_3:
 			halfSize = irr::core::vector3df(ROOM_PROPORTIONS.X, ROOM_PROPORTIONS.Y / 3.0f * 2.0f, WALL_WIDTH);
 			position = irr::core::vector3df(0.0f, -ROOM_PROPORTIONS.Y / 3.0f, ROOM_PROPORTIONS.Z * (float)(2 * sectionNumber + 1));
-			rotation = irr::core::vector3df(0.0f, 0.0f, 0.0f);
 			break;
 		case OP_TOP_2_3:
 			halfSize = irr::core::vector3df(ROOM_PROPORTIONS.X, ROOM_PROPORTIONS.Y / 3.0f * 2.0f, WALL_WIDTH);
 			position = irr::core::vector3df(0.0f, ROOM_PROPORTIONS.Y / 3.0f, ROOM_PROPORTIONS.Z * (float)(2 * sectionNumber + 1));
-			rotation = irr::core::vector3df(0.0f, 0.0f, 0.0f);
 			break;
 		default:
 			break;
@@ -726,7 +755,54 @@ bool LevelSceneNode::addObstacleTo(irr::scene::ISceneNode* parent, irr::u32 sect
 	}
 	else if (obstacleType == OT_MINE)
 	{
+		switch(obstaclePosition)
+		{
+		case OP_CENTER:
+			position.Z = ROOM_PROPORTIONS.Z * (float)(2 * sectionNumber + 1);
+			break;
+		case OP_RANDOM:
+			position.X = (irr::f32)(rand() % (irr::u32)(2.0f * ROOM_PROPORTIONS.X - 6.0f) - ROOM_PROPORTIONS.X + 3.0f);
+			position.Y = (irr::f32)(rand() % (irr::u32)(2.0f * ROOM_PROPORTIONS.Y - 6.0f) - ROOM_PROPORTIONS.Y + 3.0f);
+			position.Z = ROOM_PROPORTIONS.Z * (float)(2 * sectionNumber + 1);
+			printf("X = %f Y = %f\n", position.X, position.Y);
+			break;
+		default:
+			break;
+		}
 		
+		Mine* mine = new Mine();
+		if (!m_mineTangentMesh)
+		{
+			irr::scene::IMesh* mesh = m_sceneManager->getMesh(MODEL_PATH + MINE_MODEL_NAME_DEFAULT);
+			m_mineTangentMesh = m_sceneManager->getMeshManipulator()->createMeshWithTangents(mesh);
+		}
+		mine->initMine(parent,
+						m_sceneManager,
+						-1,
+						m_mineTangentMesh,
+						m_driver->getTexture(TEXTURE_PATH + MINE_TEXTURE_NAME_DEFAULT),
+						m_driver->getTexture(TEXTURE_PATH + MINE_NORMAL_MAP_TEXTURE_NAME_DEFAULT),
+						position,
+						rotation,
+						MINE_SCALE);
+
+//set shader material
+		irr::scene::IMeshSceneNode* obstacleNode = mine->getSceneNode();
+		if (USE_OWN_SHADER_LIGHTING)
+		{
+			if (USE_BUMP_MAPPING)
+				obstacleNode->setMaterialType((irr::video::E_MATERIAL_TYPE)m_gameManager->getShaderManager()->getBumpMaterial());
+			else if (USE_PARALLAX_MAPPING)
+				obstacleNode->setMaterialType((irr::video::E_MATERIAL_TYPE)m_gameManager->getShaderManager()->getParallaxMaterial());
+		}
+
+//insert obstacle pointer to m_obstacles array
+		m_obstacles.push_back(mine);
+		m_mines.push_back(mine);
+	}
+	else if (obstacleType == OT_LASER_MINE)
+	{
+	
 	}
 
 	return true;

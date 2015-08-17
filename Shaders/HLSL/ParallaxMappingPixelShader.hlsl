@@ -13,7 +13,7 @@ struct PS_INPUT
    float  LightDistanse:    TEXCOORD2;
 };
 
-static const float parallaxScale = 0.015f;
+static const float parallaxScale = 0.05f;
 
 float2 parallaxMapping(in float3 V, in float2 T, out float parallaxHeight)
 {
@@ -272,6 +272,7 @@ float parallaxSoftShadowMultiplier(in float3 L, in float2 initialTexCoord, in fl
 
 float4 normalMappingLighting(in float3 L, in float2 T, float shadowMultiplier, float lightDistance)
 {
+	L.x = -L.x;
    //L.y = -L.y;
    float3 fvNormal         = normalize(tex2D(normalMap, T).xyz * 2.0f - 1.0f);
    float4 fvBaseColor      = tex2D(diffuseMap, T);

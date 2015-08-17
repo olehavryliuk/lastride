@@ -5,6 +5,7 @@
 #include <irrlicht.h>
 #include "CurveRoomSceneNode.h"
 #include "Vehicle.h"
+#include "Mine.h"
 #include "CSceneNodeAnimatorTextureSheet.h"
 
 class GameManager;
@@ -29,8 +30,9 @@ struct NodeBlock
 
 enum OBSTACLE_TYPE
 {
-	OT_WALL = 0,
-	OT_MINE
+	OT_WALL		  = 0,
+	OT_MINE		  =	1,
+	OT_LASER_MINE = 2
 };
 
 enum OBSTACLE_POSITION
@@ -42,7 +44,9 @@ enum OBSTACLE_POSITION
 	OP_LEFT_2_3,
 	OP_RIGHT_2_3,
 	OP_BOTTOM_2_3,
-	OP_TOP_2_3
+	OP_TOP_2_3,
+	OP_CENTER,
+	OP_RANDOM
 };
 
 class IObstacle;
@@ -55,6 +59,10 @@ protected:
 	irr::video::IVideoDriver* m_driver;			//weak ref
 	irr::scene::ISceneManager* m_sceneManager;	//weak ref
 	irr::core::aabbox3d<irr::f32> m_box;
+
+//elements (children)
+	irr::core::array<Mine*> m_mines;
+	irr::scene::IMesh* m_mineTangentMesh;
 
 //obstacles
 	irr::core::array<IObstacle*> m_obstacles;

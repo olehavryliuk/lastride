@@ -13,10 +13,10 @@ public:
 	//irr::f32 m_angleSpeed;
 
 	Vehicle();
-	~Vehicle();
-	bool initVehicle(irr::scene::ISceneNode* parent, irr::scene::ISceneManager* sceneManager ,const irr::io::path& modelPath);
-	void update(irr::u32 deltaTime);
-	void increaseSpeedBy(irr::f32 multiplier);
+	virtual ~Vehicle();
+	virtual bool initVehicle(irr::scene::ISceneNode* parent, irr::scene::ISceneManager* sceneManager ,const irr::io::path& modelPath);
+	virtual void update(irr::u32 deltaTime);
+	virtual void increaseSpeedBy(irr::f32 multiplier);
 
 private:
 	//void recalculateAngleSpeed();
